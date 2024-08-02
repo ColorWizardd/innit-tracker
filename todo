@@ -1,0 +1,3 @@
+# Step 1: Client-Side
+- Create animated display
+    - Scrolls through each user in order of initiative, resetting at the end of each round
