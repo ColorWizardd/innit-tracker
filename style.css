@@ -1,4 +1,101 @@
+html{
+    width: 100%;
+    height: 100%;
+}
+
 body{
-    width: 800px;
-    height: 480px;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: 'spectral', 'sans-serif';
+    overflow: hidden;
+    background-color: rgb(46, 48, 48);
+    color:rgb(217, 217, 217);
+    text-shadow: 4px 4px 10px black;
+}
+
+#navbar{
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 50px;
+    padding-left: 10px;
+    height: 100px;
+    width: 100vw;
+    font-size: 36px;
+    box-shadow: 0px 2px 4px black;
+    background-color: rgb(202, 202, 202);
+    color: rgb(46, 48, 48);
+    z-index: 2;
+    text-shadow: none;
+}
+
+#flex-col{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    margin-top: 15%;
+    width: 50%;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 100px);
+    transition: transform 0.5s cubic-bezier(.5,0.85,.5,1);
+}
+
+.innit-group, .hidden{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 20px;
+    align-items: center;
+    font-size: 48px;
+    margin: 15px 0;
+    transition: all 0.7s, opacity ease-in 0.3s ;
+}
+
+.initiative-container{
+    flex-shrink: 0;
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: auto;
+    text-align: center;
+    background-image: url("assets/innitd20.png");
+    background-position: center;
+    background-origin: border-box;
+    background-size: contain;
+    filter: drop-shadow(4px 4px 5px rgb(9, 22, 44)) drop-shadow(0px 0px 3px rgb(9, 22, 44));
+}
+
+.innit-group h3{
+    margin-top: 33%;
+    font-size: 64px;
+    color:antiquewhite;
+    transition: inherit;
+    text-shadow: 0px 0px 6px black;
+}
+
+.hidden{
+    opacity: 0%;
+    transform: scale(0.2);
+}
+
+#prev, #next{
+    opacity: 60%;
+    transform: scale(0.8);
+}
+
+#prev h3, #next h3 {
+    margin-top: 35%;
+}
+
+#curr h3{
+    font-size: 72px;
+}
+
+@font-face {
+    font-family: 'spectral';
+    src: url('fonts/Spectral/Spectral-Regular.ttf');
 }
