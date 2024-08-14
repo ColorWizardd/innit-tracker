@@ -8,6 +8,36 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        
+        <script src="app.js"></script>
+        <div class="two-panel">
+            <div class="two-col">
+                <div class="input-container">
+                    <h3>Add Initiative</h3>
+                    <input type="text" placeholder="Name" id="innitName">
+                    <div id="num-container">
+                        <input type="number" id="innitNum">
+                        <label for="innitNum">Initiative</label>
+                    </div>
+                    <div id="check-container">
+                        <input type="checkbox" id="innitHide">
+                        <label for="innitHide">Hide Initiative</label>
+                    </div>
+                    <div class="submit-container">
+                        <button id="submit-button" onclick="addItem()">Add</button>
+                    </div>
+                </div>
+            </div>
+            <div class="two-col">
+                <h1 id="list-title">Innit Tracker</h1>
+                <ul id="list-container">
+                    
+                </ul>
+                <footer>
+                    <div id="round-display">
+                        <h1>Round: <span id="curr-round"></span> </h1>
+                    </div>
+                </footer>
+            </div>
+        </div>
     </body>
 </html>
