@@ -36,36 +36,54 @@ async function sortedInsert(){
             "num" : innitNum,
             "hidden" : isHidden
     }
-    
-    console.log(`Adding value ${newItem.num} to array`);
 
-    /* TODO: FIGURE OUT HOW TO DO A SORTED INSERT WHILE MAINTAINING INIT ID ORDER */
-
+    let newVal = newItem.num;
     
+    console.log(`Adding value ${newVal} to array for character ${newItem.name}`);
+
+    let newIndex = await listSearch(newVal);
+    innitArr.splice(newIndex, 0, newItem);
+    let newLi = document.createElement("li");
+
+    /* 
+    Need to append newLi to innitList in order. 
+    SOLUTION: innitList and li elements share the same index,
+    so use "li[newIndex].parentNode.insertBefore(li[newIndex+1], li[newIndex]"
+    */
+
 }
 
 
-async function listSearch(newItem){
+async function listSearch(newVal){
     let start = 0;
-    let end = innitArr.length - 1;
-    let newVal = newItem.num;
+    let end = innitArr.length;
 
-    if(start == end){
-        return start;
-    }
-
-    while(innitArr[start].num < innitArr[end].num){
-        let mid = Math.floor((start + end) / 2);
-        if(innitArr[mid].num < newVal){
-            start = mid + 1;
+    for(i = start; i < end; i++){
+        if(innitArr[i] > newVal){
+            return i-1;
         }
-        else{
-            high = mid;
-        }
-        return start;
+        return end;
     }
 }
 
 async function addItem(){
     await sortedInsert();
+}
+
+function resizeRound(){
+    const roundContainer = document.getElementById("round-display");
+    const button = document.getElementById("round-resize");
+    const upperHeight = 350;
+    const lowerHeight = 125;
+    let isFlipped = (button.className == "flipped") ? true : false;
+    let height = roundContainer.offsetHeight;
+    console.log(`Round Counter Height: `, height);
+    if(height >= upperHeight){
+        height = lowerHeight;
+    }
+    else{
+        height = upperHeight;
+    }
+    roundContainer.style.height = (height + "px");
+    isFlipped ? button.className = "unFlipped" : button.className = "flipped";
 }
