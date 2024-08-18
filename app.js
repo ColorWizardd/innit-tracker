@@ -22,19 +22,34 @@ wss.on('connection', function connection(ws){
 
 const innitArr = [];
 
-
 async function sortedInsert(){
     const innitList = document.getElementById("list-container");
     let nameBox = document.getElementById("innitName");
     let initBox = document.getElementById("innitNum");
     let hiddenCheck = document.getElementById("innitHide");
     let innitName = nameBox.value;
-    let innitNum = initBox.value;
+    let innitNum = parseInt(initBox.value);
     let isHidden = hiddenCheck.checked;
+    let itemId = 0;
+
+    if(!innitName){
+        innitName = "New Character";
+    }
+    if(isNaN(innitNum)){
+        innitNum = 0;
+    }
+    if(!innitArr){
+        itemId = 0;
+    }
+    else{
+        itemId = innitArr.length;
+    }
+
     const newItem = {
             "name" : innitName,
             "num" : innitNum,
-            "hidden" : isHidden
+            "hidden" : isHidden,
+            "id" : itemId
     }
 
     let newVal = newItem.num;
@@ -44,12 +59,20 @@ async function sortedInsert(){
     let newIndex = await listSearch(newVal);
     innitArr.splice(newIndex, 0, newItem);
     let newLi = document.createElement("li");
+    newLi.className = "list-innit-item";
+    newLi.innerHTML = 
+        `<img class="li-dice-img" src="/assets/innitd20list.png" id="item-${newItem.id}">
+        <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>`
+    let listItems = document.getElementsByTagName("li");
+    console.log("List items length before: ", listItems.length);
+    if(innitArr.length <= 1){
+        innitList.appendChild(newLi);
+    }
+    else{
+        innitList.insertBefore(newLi, listItems[newIndex]);
+    }
 
-    /* 
-    Need to append newLi to innitList in order. 
-    SOLUTION: innitList and li elements share the same index,
-    so use "li[newIndex].parentNode.insertBefore(li[newIndex+1], li[newIndex]"
-    */
+    console.log("Innit Array is now: ", innitArr);
 
 }
 
@@ -58,16 +81,37 @@ async function listSearch(newVal){
     let start = 0;
     let end = innitArr.length;
 
-    for(i = start; i < end; i++){
-        if(innitArr[i] > newVal){
-            return i-1;
-        }
-        return end;
+    console.log(`Length before insert: `, end);
+
+    if(start == end){
+        console.log(`Inserting value ${newVal} at index START`);
+        return 0;
     }
+    for(i = start; i < end; i++){
+        if(innitArr[i].num <= newVal){
+            console.log(`${newVal} is bigger than ${innitArr[i].num}`)
+            console.log(`Inserting value ${newVal} at index ${i}`);
+            return i;
+        }
+    }
+    console.log(`Inserting value ${newVal} at index END`);
+    return end;
+
+    
 }
 
 async function addItem(){
     await sortedInsert();
+    refreshId();
+}
+
+function refreshId(){
+    const elems = document.getElementById("list-container").getElementsByTagName("li");
+    for(i=0; i < elems.length; i++){
+        innitArr[i].id = i;
+        elems[i].id = `item-${i}`;
+    }
+
 }
 
 function resizeRound(){
@@ -86,4 +130,12 @@ function resizeRound(){
     }
     roundContainer.style.height = (height + "px");
     isFlipped ? button.className = "unFlipped" : button.className = "flipped";
+}
+
+function editItem(e){
+    const target = e.target.id;
+    /* Replaces all non-numbers with whitespace */
+    const parsedTarget = target.replace(/^\D+/g, '');
+    
+    /* TODO: USE HTML ID TO TARGET AND PRE-CONFIG EDITOR */
 }
