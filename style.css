@@ -122,20 +122,46 @@ body{
 #fade-panel{
     width: 100%;
     height: 100%;
-    opacity: 100%;
-    transition: all 0.1s ease-out;
+    z-index: 5;
 }
 
 .fade-active{
-    opacity: 50%;
+    opacity: 25%;
+    background-color: rgba(10, 10, 10, 60);
 }
 
 #options-panel{
-    position: absolute;
+    position: fixed;
     left: 50%;
     top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    width: 300px;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 300px;
+    padding: 10px;
+    padding-top: 0;
+    border-radius: 5px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    z-index: 20;
+    opacity: 100%;
+    background-color: rgb(46, 48, 48);
+    box-shadow: 0px 0px 8px rgb(36, 34, 34);
+}
+
+#options-panel h3{
+    width: 120%;
+    margin: 0;
+    margin-left: -10px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    background-color: rgba(36, 34, 34, 50%);
+    font-style: italic;
+    font-weight: normal;
 }
 
 
@@ -152,18 +178,19 @@ body{
     gap: 15px;
     background-color: rgb(53, 58, 58);
     border-radius: 5px;
-    padding: 10px 10px;
+    padding: 0px 0px 10px 10px;
     box-shadow: 2px 2px 8px rgb(36, 34, 34);
     overflow: hidden;
 }
 
 .input-container h3{
-    padding: 0;
-    margin: 0;
-    margin-top: 5px;
+    padding: 5px;
+    width: 120%;
+    margin: 0px 0px 0px -10px;
     font-style: italic;
     font-weight: normal;
     font-size: 24px;
+    background-color: rgba(36, 34, 34, 20%);
     border-bottom: 4px solid rgba(46, 48, 48, 40%);
 }
 
@@ -203,7 +230,7 @@ input[type=text]:focus, input[type=number]:focus{
 }
 
 
-.submit-container button{
+.submit-container button, #cancel, #confirm{
     width: 75px;
     font-family: 'spectral', sans-serif;
     font-size: 18px;
@@ -214,7 +241,18 @@ input[type=text]:focus, input[type=number]:focus{
     transition: all .2s ease-out;
 }
 
-.submit-container button:hover{
+#options-button-panel{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+#cancel, #confirm{
+    width: 100px;
+    margin: 5px 0px 10px;
+}
+
+.submit-container button:hover, #cancel:hover, #confirm:hover{
     background-color: rgba(36, 34, 34, 20%);
 }
 
@@ -326,8 +364,16 @@ footer{
     transform: rotate(180deg);
 }
 
-.hidden{
+.display-none{
     display: none;
+}
+
+.popup{
+    pointer-events: none;
+}
+
+#options-panel > *{
+    pointer-events: all;
 }
 
 @font-face {

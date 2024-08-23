@@ -45,7 +45,7 @@ function rotateList(){
         roundCount++;
     }
     else{
-        innitList.style.transform = "translate(-50%, -" + (300 * innitIndex - listOffset) + "px)";
+        innitList.style.transform = "translate(-50%, -" + (330 * innitIndex - listOffset) + "px)";
         console.log(innitCurr.offsetHeight);
         innitCurr.id = "prev";
         innitCurr.firstElementChild.id = "prev-name";
