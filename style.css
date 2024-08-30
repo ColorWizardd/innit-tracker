@@ -108,6 +108,7 @@ body{
     height: 100%;
     display: flex;
     flex-direction: row;
+    white-space: nowrap;
 }
 
 .two-col{
@@ -354,6 +355,52 @@ footer{
 
 #round-resize:hover {
     background-color: rgb(46, 48, 48);
+}
+
+.hp-cont{
+    width: 200px;
+    height: 30px;
+    background-color: darkgreen;
+    border: 2px solid rgb(10, 26, 0);
+    text-align: center;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.hp-val{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    bottom: 30px;
+    height: 30px;
+    border-radius: inherit;
+}
+
+.hp-back{
+    width: 0.1%;
+    height: 100%;
+    background-color: darkred;
+    border-radius: 0;
+    float: right;
+    transition: width 0.3s ease-out;
+}
+
+.hp-cont input{
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    font-size: 24px;
+    color: rgb(217, 217, 217);
+    text-shadow: 1px 1px 4px black;
+    appearance: auto;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.hp-cont input:focus{
+    background-color: transparent;
 }
 
 .unflipped{

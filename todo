@@ -1,5 +1,14 @@
-# Step 1: Client-Side
-- Create animated display
-    - ~~Scrolls through each user in order of initiative, resetting at the end of each round~~
+# What We Have
+- Framework to create innit list
+- Framework to display list items
 
-- Create List-maker
+## What We Need
+- The ability to transfer data between the app and client
+    - Websockets?
+
+## "Extra" To-dos
+- Add HP to items
+    - HP Bar is a curr / max
+    - Use 2 stacked divs, with the bottom div scaling its witdth to the ratio of hp to max
+- Implement hidden/dead initiatives
+- Create ability to add/display clocks

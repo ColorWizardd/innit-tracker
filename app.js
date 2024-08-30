@@ -49,7 +49,9 @@ async function sortedInsert(){
             "name" : innitName,
             "num" : innitNum,
             "hidden" : isHidden,
-            "id" : itemId
+            "id" : itemId,
+            "hp" : 0,
+            "hpMax" : 0
     }
 
     let newVal = newItem.num;
@@ -62,7 +64,15 @@ async function sortedInsert(){
     newLi.className = "list-innit-item";
     newLi.innerHTML = 
         `<img class="li-dice-img" src="/assets/innitd20list.png" id="item-${newItem.id}" onclick="editItem(event)">
-        <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>`
+        <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>
+        <div class="hp-cont" id="hp-${newItem.id}">
+        <div class="hp-back"></div>
+        <div class="hp-val">
+        <input type="number" class="hp-curr" value="${newItem.hp}" onchange="hpUpdate(event)">
+        </input>/<input type="number" class="hp-max" value="${newItem.hpMax}" onchange="hpUpdate(event)"></input>
+        </div>
+        </div>
+        `
     let listItems = document.getElementsByTagName("li");
     console.log("List items length before: ", listItems.length);
     if(innitArr.length <= 1){
@@ -121,17 +131,68 @@ function sortList(){
     try{
         innitArr.sort((a, b) => b.num - a.num);
         for(item in elems){
-            console.log(elems[item]);
             let diceImg = elems[item].firstChild, innitNum = diceImg.nextElementSibling,
             innitName = innitNum.nextElementSibling;
+            let hpBar = elems[item].children[3].children[1];
+            console.log("HP BAR: ", hpBar);
+            let hpCurr = hpBar.firstElementChild;
+            let hpMax = hpBar.children[1];
             diceImg.id = `item-${item}`;
             innitNum.textContent = innitArr[item].num;
             innitName.textContent = innitArr[item].name;
+            hpCurr.value = innitArr[item].hp;
+            hpMax.value = innitArr[item].hpMax;
+            console.log({
+                "HP ID" : item,
+                "HP CURR: " : hpCurr.value,
+                "HP MAX: " : hpMax.value
+            })
+
+            hpScale(item, hpCurr.value, hpMax.value);
         }
     }
     catch(error){
         return new Error(error);
     }
+}
+
+function hpUpdate(event){
+
+    /* GRAB ID FOR EACH UPDATE AND CHANGE INNITARR HP */
+
+    let eventTarget = event.target;
+    let parent = eventTarget.parentElement;
+    let hpId = parent.parentElement.id;
+    let parsedId = hpId.replace(/^\D+/g, '');
+    let childrenArr = parent.children;
+    let currHp = parseInt(childrenArr[0].value);
+    let maxHp = parseInt(childrenArr[1].value);
+
+    if(currHp > maxHp){
+        console.error("ERROR: Current HP cannot be bigger than max.")
+        currHp = maxHp;
+        childrenArr[0].value = `${currHp}`;
+    }
+
+    innitArr[parsedId].hp = currHp;
+    innitArr[parsedId].hpMax = maxHp;
+
+    hpScale(parsedId, currHp, maxHp);
+}
+
+function hpScale(targetId, currHp, maxHp){
+
+    let hpBar = document.getElementById(`hp-${targetId}`);
+    let hpBack = hpBar.firstElementChild.style;
+
+    hpRatio = 100 - ((currHp/maxHp).toFixed(2)*100);
+
+    if(hpRatio <= 0){
+        hpRatio = 0.1
+    }
+
+    hpBack.width = `${hpRatio}%`;
+
 }
 
 function resizeRound(){
