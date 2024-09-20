@@ -21,6 +21,7 @@ wss.on('connection', function connection(ws){
 /* --  Innit List Functionality -- */
 
 const innitArr = [];
+const listImg = "assets/innitd20list.png"
 
 async function sortedInsert(){
     const innitList = document.getElementById("list-container");
@@ -63,7 +64,7 @@ async function sortedInsert(){
     let newLi = document.createElement("li");
     newLi.className = "list-innit-item";
     newLi.innerHTML = 
-        `<img class="li-dice-img" src="/assets/innitd20list.png" id="item-${newItem.id}" onclick="editItem(event)">
+        `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}" onclick="editItem(event)">
         <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>
         <div class="hp-cont" id="hp-${newItem.id}">
         <div class="hp-back"></div>
@@ -193,6 +194,78 @@ function hpScale(targetId, currHp, maxHp){
 
     hpBack.width = `${hpRatio}%`;
 
+}
+
+/* -- Round Settings -- */
+
+let roundCount = 0;
+let turnCount = 0;
+
+function initialTurn(){
+    const turnList = document.getElementById("list-container");
+    const startingTurn = turnList.children[0];
+    setCurrStyle(startingTurn);
+}
+
+async function getCurrTurn(){
+    return document.getElementsByClassName("round-curr")[0];
+}
+
+/* Move the turn counter forwards/backwards */
+async function moveTurn(isForwards){
+    const turnElems = document.getElementById("list-container").children;
+    const currTurn = await getCurrTurn();
+    let nextTurn;
+    let checkedTurnCount;
+    if(isForwards){
+        checkedTurnCount = await roundCountCheck(++turnCount);
+        nextTurn = currTurn.nextElementSibling;
+    }
+    else{
+        checkedTurnCount = await roundCountCheck(--turnCount);
+        nextTurn = currTurn.previousElementSibling;
+    }
+    console.log("Curr Turn Position: ", checkedTurnCount);
+    clearCurrStyle(currTurn);
+    console.log("Turn elements: ", turnElems);
+    console.log("New Turn Count: ", checkedTurnCount);
+    if(!nextTurn){
+        setCurrStyle(turnElems[checkedTurnCount]);
+    }
+    else{
+        setCurrStyle(nextTurn);
+    }
+}
+
+/* Every time the turn moves, check if index is greater than total items or less than 0, cycling if true*/
+
+async function roundCountCheck(turn){
+    if(turn >= innitArr.length){
+        roundCount++;
+        turnCount = 0;
+        await roundCountUpdate(roundCount);
+    }
+    else if(turn < 0){
+        roundCount--;
+        turnCount = innitArr.length - 1;
+        await roundCountUpdate(roundCount);
+    }
+    return turnCount;
+
+}
+
+/* If the round count needs to change, fire the update function to change the count */
+async function roundCountUpdate(newRoundCount){
+    const roundCountDisplay = document.getElementById("curr-round");
+    roundCountDisplay.innerText = newRoundCount;
+}
+
+function setCurrStyle(item){
+    item.classList.add("round-curr");
+}
+
+function clearCurrStyle(item){
+    item.classList.remove("round-curr");
 }
 
 function resizeRound(){
