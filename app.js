@@ -20,40 +20,30 @@ wss.on('connection', function connection(ws){
 
 /* --  Innit List Functionality -- */
 
+class InnitItem{
+    constructor(name, num, hidden, id, hp, hpMax){
+        this.name = name;
+        this.num = num;
+        this.hidden = hidden;
+        this.id = id;
+        this.hp = hp;
+        this.hpMax = hpMax
+    }
+}
+
 const innitArr = [];
 const listImg = "assets/innitd20list.png"
 
-async function sortedInsert(){
+
+async function sortedInsert(item){
+
     const innitList = document.getElementById("list-container");
-    let nameBox = document.getElementById("innitName");
-    let initBox = document.getElementById("innitNum");
-    let hiddenCheck = document.getElementById("innitHide");
-    let innitName = nameBox.value;
-    let innitNum = parseInt(initBox.value);
-    let isHidden = hiddenCheck.checked;
-    let itemId = 0;
 
-    if(!innitName){
-        innitName = "New Character";
-    }
-    if(isNaN(innitNum)){
-        innitNum = 0;
-    }
-    if(!innitArr){
-        itemId = 0;
-    }
-    else{
-        itemId = innitArr.length;
+    if(!item){
+        return new ReferenceError("No item could be retrieved.");
     }
 
-    const newItem = {
-            "name" : innitName,
-            "num" : innitNum,
-            "hidden" : isHidden,
-            "id" : itemId,
-            "hp" : 0,
-            "hpMax" : 0
-    }
+    const newItem = item;
 
     let newVal = newItem.num;
     
@@ -111,8 +101,38 @@ async function listSearch(newVal){
     
 }
 
-async function addItem(){
-    await sortedInsert();
+async function fetchItemInput(){
+    const innitList = document.getElementById("list-container");
+    let nameBox = document.getElementById("innitName");
+    let initBox = document.getElementById("innitNum");
+    let hiddenCheck = document.getElementById("innitHide");
+    let innitName = nameBox.value;
+    let innitNum = parseInt(initBox.value);
+    let isHidden = hiddenCheck.checked;
+    let itemId = 0;
+
+    if(!innitName){
+        innitName = "New Character";
+    }
+    if(isNaN(innitNum)){
+        innitNum = 0;
+    }
+    if(!innitArr){
+        itemId = 0;
+    }
+    else{
+        itemId = innitArr.length;
+    }
+
+    let hp = 0;
+    let hpMax = 0;
+
+    return new InnitItem(innitName, innitNum, isHidden, itemId, hp, hpMax);
+}
+
+async function addInputItem(){
+    const newItem = await fetchItemInput();
+    await sortedInsert(newItem);
     refreshId();
 }
 
@@ -126,31 +146,26 @@ function refreshId(){
 
 }
 
-function sortList(){
+async function sortList(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
     console.log("Sorting array...");
     try{
         innitArr.sort((a, b) => b.num - a.num);
         for(item in elems){
-            let diceImg = elems[item].firstChild, innitNum = diceImg.nextElementSibling,
-            innitName = innitNum.nextElementSibling;
-            let hpBar = elems[item].children[3].children[1];
-            console.log("HP BAR: ", hpBar);
-            let hpCurr = hpBar.firstElementChild;
-            let hpMax = hpBar.children[1];
+            if(isNaN(item)){
+                console.log("No more elements left!");
+                break;
+            }
+            console.log(`Currently on item ${item}`);
+            let diceImg = elems[item].firstChild;
+            let innitNum = diceImg.nextElementSibling;
+            let innitName = innitNum.nextElementSibling;
             diceImg.id = `item-${item}`;
+            console.log(`Item: ${item}, Name: ${innitArr[item].name}, Num: ${innitArr[item].num}`);
             innitNum.textContent = innitArr[item].num;
             innitName.textContent = innitArr[item].name;
-            hpCurr.value = innitArr[item].hp;
-            hpMax.value = innitArr[item].hpMax;
-            console.log({
-                "HP ID" : item,
-                "HP CURR: " : hpCurr.value,
-                "HP MAX: " : hpMax.value
-            })
-
-            hpScale(item, hpCurr.value, hpMax.value);
         }
+        await scaleAllHp();
     }
     catch(error){
         return new Error(error);
@@ -158,8 +173,6 @@ function sortList(){
 }
 
 function hpUpdate(event){
-
-    /* GRAB ID FOR EACH UPDATE AND CHANGE INNITARR HP */
 
     let eventTarget = event.target;
     let parent = eventTarget.parentElement;
@@ -181,19 +194,51 @@ function hpUpdate(event){
     hpScale(parsedId, currHp, maxHp);
 }
 
-function hpScale(targetId, currHp, maxHp){
+async function hpScale(targetId, currHp, maxHp){
 
     let hpBar = document.getElementById(`hp-${targetId}`);
     let hpBack = hpBar.firstElementChild.style;
 
     hpRatio = 100 - ((currHp/maxHp).toFixed(2)*100);
 
-    if(hpRatio <= 0){
+    if(isNaN(hpRatio) || hpRatio <= 0){
         hpRatio = 0.1
     }
 
     hpBack.width = `${hpRatio}%`;
 
+}
+
+async function scaleAllHp(){
+    const elems = document.getElementById("list-container").getElementsByTagName("li");
+    console.log("HP Elems Count: ", elems.length);
+    for(item in elems){
+        if(isNaN(item)){
+            console.log("Scaled all HP bars!");
+            break;
+        }
+        let hpParent = elems[item].children[3];
+        let hpBar = hpParent.children[1];
+        console.log("HP BAR: ", hpBar);
+        let hpCurr = hpBar.firstElementChild;
+        let hpMax = hpBar.children[1];
+
+        hpParent.id = `hp-${item}`;
+
+        let newHp = innitArr[item].hp;
+        let newHpMax = innitArr[item].hpMax;
+
+        console.log("Curr Bar: ", hpCurr);
+        console.log("Curr Bar Max: ", hpMax);
+        hpCurr.value = newHp;
+        hpMax.value = newHpMax;
+        console.log({
+            "HP ID" : item,
+            "HP CURR: " : newHp,
+            "HP MAX: " : newHpMax
+        })
+        await hpScale(item, newHp, newHpMax);
+    }
 }
 
 /* -- Round Settings -- */
@@ -341,8 +386,8 @@ function editCancel(){
 function editConfirm(innitId){
     const newName = document.getElementById("name-edit").value;
     const newNum = parseInt(document.getElementById("num-edit").value);
-    const innitItem = innitArr[innitId];
-    innitItem.name = newName, innitItem.num = newNum;
+    const item = innitArr[innitId];
+    item.name = newName, item.num = newNum;
     try{
         sortList();
         editCancel();
