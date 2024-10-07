@@ -231,7 +231,7 @@ input[type=text]:focus, input[type=number]:focus{
 }
 
 
-.submit-container button, #cancel, #confirm{
+.submit-container button, #cancel, #confirm, #delete{
     width: 75px;
     font-family: 'spectral', sans-serif;
     font-size: 18px;
@@ -248,13 +248,21 @@ input[type=text]:focus, input[type=number]:focus{
     gap: 20px;
 }
 
-#cancel, #confirm{
+#cancel, #confirm, #delete{
     width: 100px;
     margin: 5px 0px 10px;
 }
 
+#delete{
+    background-color: rgb(104, 71, 31);
+}
+
 .submit-container button:hover, #cancel:hover, #confirm:hover{
     background-color: rgba(36, 34, 34, 20%);
+}
+
+#delete:hover{
+    background-color: rgb(66, 42, 13);
 }
 
 #list-container{
