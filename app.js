@@ -74,7 +74,7 @@ async function sortedInsert(item){
     }
 
     console.log("Innit Array is now: ", innitArr);
-
+    scaleAllHp();
 }
 
 
@@ -258,6 +258,11 @@ async function getCurrTurn(){
 
 /* Move the turn counter forwards/backwards */
 async function moveTurn(isForwards){
+
+    if(!isForwards){
+        isForwards = false;
+    }
+
     const turnElems = document.getElementById("list-container").children;
     const currTurn = await getCurrTurn();
     let nextTurn;
