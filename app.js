@@ -360,6 +360,7 @@ function editItem(event){
         </div>
         <div id="options-button-panel">
             <button id="cancel" onclick="editCancel()">Cancel</button>
+            <button id="delete" onclick="editDelete(${parsedId})">Delete</button>
             <button id="confirm" onclick="editConfirm(${parsedId})">Confirm</button>
         </div>    
     `
@@ -395,9 +396,22 @@ function editConfirm(innitId){
     item.name = newName, item.num = newNum;
     try{
         sortList();
-        editCancel();
     }
     catch(error){
         return new Error(error);
     }
+    editCancel();
+}
+
+function editDelete(innitId){
+    const itemList = document.getElementById("list-container");
+    try{
+        innitArr.splice(innitId, 1);
+        itemList.removeChild(itemList.children[innitId]);
+        sortList();
+    }
+    catch(error){
+        return new Error(error);
+    }
+    editCancel();
 }
