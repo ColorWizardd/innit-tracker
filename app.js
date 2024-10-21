@@ -360,8 +360,8 @@ function editItem(event){
         </div>
         <div id="options-button-panel">
             <button id="cancel" onclick="editCancel()">Cancel</button>
-            <button id="confirm" onclick="editConfirm(${parsedId})">Confirm</button>
             <button id="delete" onclick="editDelete(${parsedId})">Delete</button>
+            <button id="confirm" onclick="editConfirm(${parsedId})">Confirm</button>
         </div>    
     `
 
