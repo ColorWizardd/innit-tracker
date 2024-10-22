@@ -5,15 +5,8 @@
 ## What We Need
 - The ability to transfer data between the app and client
     - Websockets?
-- CURRENT: Add "round" functionality for encounters
-    - Start and end encounters
-    - Keep track of current turn index
-        - If initiatives change mid-encounter, stay at the same index
-    - Increment/Decrement round counter whenever the turn order fully cycles
+
 
 ## "Extra" To-dos
-- ~~Add HP to items~~
-    - ~~HP Bar is a curr / max~~
-    - ~~Use 2 stacked divs, with the bottom div scaling its witdth to the ratio of hp to max~~
-- Implement hidden/dead initiatives
+- CURRENT: Implement hidden/dead initiatives
 - Create ability to add/display clocks

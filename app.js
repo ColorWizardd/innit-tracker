@@ -52,7 +52,7 @@ async function sortedInsert(item){
     let newIndex = await listSearch(newVal);
     innitArr.splice(newIndex, 0, newItem);
     let newLi = document.createElement("li");
-    newLi.className = "list-innit-item";
+    newLi.className = `list-innit-item hidden-${newItem.hidden}`;
     newLi.innerHTML = 
         `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}" onclick="editItem(event)">
         <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>
@@ -238,6 +238,25 @@ async function scaleAllHp(){
             "HP MAX: " : newHpMax
         })
         await hpScale(item, newHp, newHpMax);
+
+    }
+}
+
+async function refreshHidden(){
+    const elems = document.getElementById("list-container").getElementsByTagName("li");
+    console.log(elems.length);
+    console.log(innitArr);
+    
+    for(let item = 0; item < elems.length; item++){
+        console.log(innitArr[item]);
+        if(innitArr[item].hidden == true && elems[item].classList.contains("hidden-false")){
+            console.log(`Hiding item number ${item};`);
+            elems[item].classList.replace("hidden-false", "hidden-true");
+        }
+        else if(innitArr[item].hidden == false && elems[item].classList.contains("hidden-true")){
+            console.log(`Revealing item number ${item};`);
+            elems[item].classList.replace("hidden-true", "hidden-false");
+        }
     }
 }
 
@@ -343,7 +362,11 @@ function editItem(event){
         const targetId = eventTarget.id;
         /* Replaces all non-numbers with whitespace */
         const parsedId = targetId.replace(/^\D+/g, '');
-        const targetItem = innitArr[parsedId]; 
+        const targetItem = innitArr[parsedId];
+        let checkedHtml ="";
+        if(targetItem.hidden){
+            checkedHtml = "checked";
+        }
         console.log(`Editing item ${parsedId}...`);
         screenPanel.className = "fade-active";
     
@@ -357,6 +380,8 @@ function editItem(event){
         <div class="panel-option">
             <label for="num-edit">Initative Value</label><br>
             <input type="number" id="num-edit" placeholder="0" value="${targetItem.num}">
+            <input type="checkbox" id="hide-edit" ${checkedHtml}>
+            <label for="innitHide">Hide Initiative</label>
         </div>
         <div id="options-button-panel">
             <button id="cancel" onclick="editCancel()">Cancel</button>
@@ -389,15 +414,18 @@ function editCancel(){
     optionsPanel.remove();
 }
 
-function editConfirm(innitId){
+async function editConfirm(innitId){
     const newName = document.getElementById("name-edit").value;
     const newNum = parseInt(document.getElementById("num-edit").value);
+    const isHidden = document.getElementById("hide-edit").checked;
     const item = innitArr[innitId];
-    item.name = newName, item.num = newNum;
+    item.name = newName, item.num = newNum, item.hidden = isHidden;
     try{
-        sortList();
+       await sortList();
+       await refreshHidden();
     }
     catch(error){
+        console.error(error);
         return new Error(error);
     }
     editCancel();

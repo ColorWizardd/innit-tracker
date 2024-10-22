@@ -436,6 +436,10 @@ footer{
     display: none;
 }
 
+.hidden-true{
+    opacity: 60%;
+}
+
 .popup{
     pointer-events: none;
 }
