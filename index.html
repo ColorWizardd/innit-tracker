@@ -19,12 +19,28 @@
                             <input type="number" id="innitNum">
                             <label for="innitNum">Initiative Value</label>
                         </div>
-                        <div id="check-container">
+                        <div class="check-container">
                             <input type="checkbox" id="innitHide">
                             <label for="innitHide">Hide Initiative</label>
                         </div>
                         <div class="submit-container">
                             <button id="submit-button" onclick="addInputItem()">Add</button>
+                        </div>
+                    </div>
+                    <div class="input-container" id="user-config">
+                        <h3>Settings Config</h3>
+                        <div class="check-container" id="config-list">
+                            <input type="checkbox" id="hiddenSkip">
+                                <label for="hiddenSkip">Skip Hidden Initatives</label><br>
+                            <input type="checkbox" id="hiddenMystify">
+                                <label for="hiddenMystify">Mystify Hidden Initatives</label><br>
+                            <input type="checkbox" id="deadSkip">
+                                <label for="deadSkip">Skip "Dead" Initatives (0 HP)</label><br>
+                            <input type="checkbox" id="hpNegative">
+                                <label for="hpNegative">Allow Negative HP Values</label>
+                            </div>
+                            <div class="submit-container">
+                                <button id="settings-clear">Clear Settings</button>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,6 @@
+/* --  MODULE IMPORTS --  */
+
+
 /*
 const { WebSocketServer } = require('ws');
 const wss = new WebSocketServer( {port: 21000} );
@@ -31,8 +34,9 @@ class InnitItem{
     }
 }
 
+const localConfig = fetch("./settings.json");
 const innitArr = [];
-const listImg = "assets/innitd20list.png"
+const listImg = "assets/innitd20list.png";
 
 
 async function sortedInsert(item){
@@ -102,7 +106,6 @@ async function listSearch(newVal){
 }
 
 async function fetchItemInput(){
-    const innitList = document.getElementById("list-container");
     let nameBox = document.getElementById("innitName");
     let initBox = document.getElementById("innitNum");
     let hiddenCheck = document.getElementById("innitHide");
@@ -443,3 +446,26 @@ function editDelete(innitId){
     }
     editCancel();
 }
+
+/* --  User Config -- */
+
+function writeSettings(){
+
+}
+
+function refreshSettings(localConfig){
+
+}
+
+function clearSettings(){
+    refreshSettings(defaultSettings);
+}
+
+/* EXPORTS */
+
+
+/* SHITTY FUNCTION DUMP */
+
+// For right now, functions don't want to be recognized if they're only part of generated HTML
+// Instead of the static website, so we're gonna dump these functions here so they don't die
+
