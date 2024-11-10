@@ -279,24 +279,75 @@ async function getCurrTurn(){
 }
 
 /* Move the turn counter forwards/backwards */
-async function moveTurn(isForwards){
 
+/* TODO: Check hidden elements ahead/behind, then skip if option is selected */
+async function moveTurn(isForwards){
     if(!isForwards){
         isForwards = false;
     }
 
     const turnElems = document.getElementById("list-container").children;
     const currTurn = await getCurrTurn();
-    let nextTurn;
+
+    const deadSkip = document.getElementById("deadSkip").checked;
+    const hiddenSkip = document.getElementById("hiddenSkip").checked;
+
     let checkedTurnCount;
+    let nextTurn;
+
+    // On forward movement, skip hidden elems and cycle back to start if final elem is hidden
+
     if(isForwards){
-        checkedTurnCount = await roundCountCheck(++turnCount);
+        turnCount++;
+        checkedTurnCount = await roundCountCheck(turnCount);
         nextTurn = currTurn.nextElementSibling;
+            while(hiddenSkip && innitArr[turnCount].hidden){
+                ++turnCount;
+                checkedTurnCount = await roundCountCheck(turnCount);
+                nextTurn = turnElems[checkedTurnCount];
+                console.log("Next Turn: ", nextTurn);
+            }
+           /* if(deadSkip){
+                while(innitArr[turnCount].hp <= 0){
+                    turnMark = turnCount;
+                    checkedTurnCount = await roundCountCheck(++turnCount);
+                    nextTurn ? nextTurn = nextTurn.nextElementSibling : nextTurn = turnElems[0];                    
+                    if(currRound != roundCount && turnMark == turnCount){
+                        console.error("All HPs are set to 0!");
+                        roundCount--;
+                        break;
+                    }
+                }
+            } 
+            */
     }
     else{
-        checkedTurnCount = await roundCountCheck(--turnCount);
+        turnCount--;
+        checkedTurnCount = await roundCountCheck(turnCount);
         nextTurn = currTurn.previousElementSibling;
+            while(hiddenSkip && innitArr[turnCount].hidden){
+                --turnCount;
+                checkedTurnCount = await roundCountCheck(turnCount);
+                nextTurn = turnElems[checkedTurnCount];
+                console.log("Next Turn: ", nextTurn);
+            }
+           /* if(deadSkip){
+                while(innitArr[turnCount].hp <= 0){
+                    turnMark = turnCount;
+                    checkedTurnCount = await roundCountCheck(--turnCount);
+                    nextTurn ? nextTurn = nextTurn.previousElementSibling : nextTurn = turnElems[turnElems.length -1];
+                    turnCount = turnElems.length;
+                    if(currRound != roundCount && turnMark == turnCount){
+                        roundCount++;
+                        console.error("All HPs are set to 0!");
+                        break;
+                    }
+                        
+                }
+            }
+                */
     }
+
     console.log("Curr Turn Position: ", checkedTurnCount);
     clearCurrStyle(currTurn);
     console.log("Turn elements: ", turnElems);
@@ -344,7 +395,7 @@ function resizeRound(){
     const roundContainer = document.getElementById("round-display");
     const button = document.getElementById("round-resize");
     const upperHeight = 350;
-    const lowerHeight = 125;
+    const lowerHeight = 150;
     let isFlipped = (button.className == "flipped") ? true : false;
     let height = roundContainer.offsetHeight;
     console.log(`Round Counter Height: `, height);
