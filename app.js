@@ -326,21 +326,14 @@ async function moveTurn(isForwards){
                 ++turnCount;
                 checkedTurnCount = await roundCountCheck(turnCount);
                 nextTurn = turnElems[checkedTurnCount];
-                console.log("Next Turn: ", nextTurn);
             }
-           /* if(deadSkip){
+           if(deadSkip){
                 while(innitArr[turnCount].hp <= 0){
-                    turnMark = turnCount;
-                    checkedTurnCount = await roundCountCheck(++turnCount);
-                    nextTurn ? nextTurn = nextTurn.nextElementSibling : nextTurn = turnElems[0];                    
-                    if(currRound != roundCount && turnMark == turnCount){
-                        console.error("All HPs are set to 0!");
-                        roundCount--;
-                        break;
-                    }
+                    ++turnCount;
+                    checkedTurnCount = await roundCountCheck(turnCount);
+                    nextTurn = turnElems[checkedTurnCount];
                 }
             } 
-            */
     }
     else{
         turnCount--;
@@ -350,23 +343,14 @@ async function moveTurn(isForwards){
                 --turnCount;
                 checkedTurnCount = await roundCountCheck(turnCount);
                 nextTurn = turnElems[checkedTurnCount];
-                console.log("Next Turn: ", nextTurn);
             }
-           /* if(deadSkip){
+            if(deadSkip){
                 while(innitArr[turnCount].hp <= 0){
-                    turnMark = turnCount;
-                    checkedTurnCount = await roundCountCheck(--turnCount);
-                    nextTurn ? nextTurn = nextTurn.previousElementSibling : nextTurn = turnElems[turnElems.length -1];
-                    turnCount = turnElems.length;
-                    if(currRound != roundCount && turnMark == turnCount){
-                        roundCount++;
-                        console.error("All HPs are set to 0!");
-                        break;
-                    }
-                        
+                    --turnCount;
+                    checkedTurnCount = await roundCountCheck(turnCount);
+                    nextTurn = turnElems[checkedTurnCount]; 
                 }
             }
-                */
     }
 
     console.log("Curr Turn Position: ", checkedTurnCount);
