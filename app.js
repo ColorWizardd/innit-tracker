@@ -268,9 +268,27 @@ async function refreshHidden(){
 let roundCount = 0;
 let turnCount = 0;
 
-function initialTurn(){
+async function initialTurn(){
+    const deadSkip = document.getElementById("deadSkip").checked;
+    const hiddenSkip = document.getElementById("hiddenSkip").checked;
     const turnList = document.getElementById("list-container");
-    const startingTurn = turnList.children[0];
+    let startingTurn;
+
+    console.log("Aight, so far so good...");
+
+    if(await infRoundLoopCheck()){return new Error("HUH???");}
+
+    console.log("closer...")
+
+    startingTurn = turnList.children[0];
+
+    if((deadSkip && innitArr[0].hp <= 0) || (hiddenSkip && innitArr[0].hidden)){
+        moveTurn(true);
+        startingTurn = turnList.children[turnCount];
+    }
+
+    console.log
+
     setCurrStyle(startingTurn);
 }
 
@@ -282,6 +300,9 @@ async function getCurrTurn(){
 
 /* TODO: Check hidden elements ahead/behind, then skip if option is selected */
 async function moveTurn(isForwards){
+
+    if(await infRoundLoopCheck()){return;}
+
     if(!isForwards){
         isForwards = false;
     }
@@ -383,6 +404,30 @@ async function roundCountUpdate(newRoundCount){
     roundCountDisplay.innerText = newRoundCount;
 }
 
+
+/* Check if the initative order will loop infinitely because of only hidden or dead turns */
+
+async function infRoundLoopCheck() {
+    const deadSkip = document.getElementById("deadSkip").checked;
+    const hiddenSkip = document.getElementById("hiddenSkip").checked;
+    
+    if(!hiddenSkip && !deadSkip){
+        return false;
+    }
+
+    if(hiddenSkip && innitArr.find((item) => item.hidden == false) != undefined){
+        return false;
+    }
+
+    if(deadSkip && innitArr.find((item) => item.hp > 0) != undefined){
+        return false;
+    }
+
+    console.error("ERROR: Current initiative configuration will lead to infinite loop");
+
+    return true;
+}
+    
 function setCurrStyle(item){
     item.classList.add("round-curr");
 }
