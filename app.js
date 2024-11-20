@@ -407,7 +407,7 @@ async function infRoundLoopCheck() {
         return false;
     }
 
-    console.error("ERROR: Current initiative configuration will lead to infinite loop");
+    window.alert("ERROR: Current initiative configuration will lead to infinite loop.\n Check config settings for issue.");
 
     return true;
 }
