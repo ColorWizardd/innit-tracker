@@ -222,7 +222,7 @@ input[type=text]:focus, input[type=number]:focus{
     background-color: rgb(219, 233, 232);
 }
 
-#check-container{
+.check-container{
     background-color: rgb(65, 69, 69);
     width: 120%;
     margin-left: -10px;
@@ -232,7 +232,8 @@ input[type=text]:focus, input[type=number]:focus{
 
 
 .submit-container button, #cancel, #confirm, #delete{
-    width: 75px;
+    width: auto;
+    padding: 0px 15px;
     font-family: 'spectral', sans-serif;
     font-size: 18px;
     border-radius: 5px;
@@ -240,6 +241,18 @@ input[type=text]:focus, input[type=number]:focus{
     background-color: rgb(53, 58, 58);
     color: rgb(217, 217, 217);
     transition: all .2s ease-out;
+}
+
+#user-config{
+    top: 10%;
+}
+
+#config-list{
+    background-color: inherit;
+}
+
+#config-list input{
+    margin-bottom: 10px;
 }
 
 #options-button-panel{
@@ -349,7 +362,7 @@ footer{
 
 #round-display {
     width: 100%;
-    height: 125px;
+    height: 150px;
     position: absolute;
     bottom: 0px;
     padding-left: 25px;
@@ -434,6 +447,10 @@ footer{
 
 .display-none{
     display: none;
+}
+
+.hidden-true{
+    opacity: 60%;
 }
 
 .popup{

@@ -1,0 +1,27 @@
+/*--   APP SETTINGS  -- */
+
+/*
+
+Method - Use LocalStorage to store setting values.
+
+--  Settings List: --
+1. Skip over hidden initatives
+1b. Mystify hidden initatives (display as '???')
+2. Skip over initatives with 0 HP
+
+-- FUTURE IDEAS --
+1. Revamp color settings to be purely values, save color presets
+2. Save a JSON file for preset encounters + settings.
+
+*/
+
+{
+    "init_settings": {
+        "skip_hidden": false,
+        "mystify_hidden": false,
+        "skip_dead": false,
+        "negative_hp": false
+    }
+        
+
+}
