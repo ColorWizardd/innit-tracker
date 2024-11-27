@@ -1,26 +1,11 @@
-/* --  MODULE IMPORTS --  */
-
-
-/*
-const { WebSocketServer } = require('ws');
-const wss = new WebSocketServer( {port: 21000} );
-
- -- Websocket Functionality -- 
-
-wss.on('connection', function connection(ws){
-    console.log(`New client connected!`);
-
-    ws.addEventListener('message', (event) =>{
-        console.log("New server message: ", event.data);
-    })
-
-    ws.on('close', function(){
-
-    });
-});
-*/
-
-
+const connection = new WebSocket("ws://localhost:30000");
+connection.addEventListener("open", () => {
+    console.log("Connected!");
+    connection.send("Test Line");
+     });
+connection.addEventListener("message", (message) =>{
+    console.log(`Message Received: ${message.data}`);
+            
 /* --  Innit List Functionality -- */
 
 class InnitItem{
@@ -37,6 +22,8 @@ class InnitItem{
 const localConfig = fetch("./settings.json");
 const innitArr = [];
 const listImg = "assets/innitd20list.png";
+
+let saveList = []; // SAVED ARRAYS
 
 
 async function sortedInsert(item){
@@ -527,25 +514,28 @@ function editDelete(innitId){
     editCancel();
 }
 
-/* --  User Config -- */
+/* -- DATA INTERACTING WITH SERVER -- */
 
-function writeSettings(){
+async function sendInnitArr(arr, listName){
+    const execTime = Date.now().valueOf();
+    execTime.toString().concat("-", saveList.length);
+    let checkedListName = listName || `List ${saveList.length}`;
+    let newList = 
+        {
+            "listName" : checkedListName,
+            "listItems" : [arr]
+        };
+    let packagedList = JSON.stringify(newList);
+    
+    try {
+        saveList.push(newList);
+        localStorage.setItem(`list-${saveList.length}`, packagedList);
+    } catch (error) {
+        console.error(error);
+    }
 
 }
 
-function refreshSettings(localConfig){
-
+async function sendActiveArr(name){
+    await sendInnitArr(innitArr, name);
 }
-
-function clearSettings(){
-    refreshSettings(defaultSettings);
-}
-
-/* EXPORTS */
-
-
-/* SHITTY FUNCTION DUMP */
-
-// For right now, functions don't want to be recognized if they're only part of generated HTML
-// Instead of the static website, so we're gonna dump these functions here so they don't die
-

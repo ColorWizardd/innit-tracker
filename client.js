@@ -1,15 +1,5 @@
 /* WEBSOCKET FUNCTIONALITY */
 
-const socket = new WebSocket('ws://localhost:21000');
-
-socket.onopen = function(event){
-    console.log(`Client connected!`);
-}
-
-socket.onclose = function(event){
-    console.log(`Client disconnected`);
-}
-
 /* SCROLLING INNIT LIST */
 
 let innitIndex = 0;
