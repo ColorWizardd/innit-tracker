@@ -5,7 +5,7 @@ connection.addEventListener("open", () => {
      });
 connection.addEventListener("message", (message) =>{
     console.log(`Message Received: ${message.data}`);
-            
+});       
 /* --  Innit List Functionality -- */
 
 class InnitItem{
