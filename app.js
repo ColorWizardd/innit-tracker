@@ -5,9 +5,7 @@ connection.addEventListener("open", () => {
      });
 connection.addEventListener("message", (message) =>{
     console.log(`Message Received: ${message.data}`);
-});
             
-
 /* --  Innit List Functionality -- */
 
 class InnitItem{
@@ -21,8 +19,9 @@ class InnitItem{
     }
 }
 
+const localConfig = fetch("./settings.json");
 const innitArr = [];
-const listImg = "assets/innitd20list.png"
+const listImg = "assets/innitd20list.png";
 
 let saveList = []; // SAVED ARRAYS
 
@@ -44,7 +43,7 @@ async function sortedInsert(item){
     let newIndex = await listSearch(newVal);
     innitArr.splice(newIndex, 0, newItem);
     let newLi = document.createElement("li");
-    newLi.className = "list-innit-item";
+    newLi.className = `list-innit-item hidden-${newItem.hidden}`;
     newLi.innerHTML = 
         `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}" onclick="editItem(event)">
         <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>
@@ -229,6 +228,25 @@ async function scaleAllHp(){
             "HP MAX: " : newHpMax
         })
         await hpScale(item, newHp, newHpMax);
+
+    }
+}
+
+async function refreshHidden(){
+    const elems = document.getElementById("list-container").getElementsByTagName("li");
+    console.log(elems.length);
+    console.log(innitArr);
+    
+    for(let item = 0; item < elems.length; item++){
+        console.log(innitArr[item]);
+        if(innitArr[item].hidden == true && elems[item].classList.contains("hidden-false")){
+            console.log(`Hiding item number ${item};`);
+            elems[item].classList.replace("hidden-false", "hidden-true");
+        }
+        else if(innitArr[item].hidden == false && elems[item].classList.contains("hidden-true")){
+            console.log(`Revealing item number ${item};`);
+            elems[item].classList.replace("hidden-true", "hidden-false");
+        }
     }
 }
 
@@ -237,9 +255,27 @@ async function scaleAllHp(){
 let roundCount = 0;
 let turnCount = 0;
 
-function initialTurn(){
+async function initialTurn(){
+    const deadSkip = document.getElementById("deadSkip").checked;
+    const hiddenSkip = document.getElementById("hiddenSkip").checked;
     const turnList = document.getElementById("list-container");
-    const startingTurn = turnList.children[0];
+    let startingTurn;
+
+    console.log("Aight, so far so good...");
+
+    if(await infRoundLoopCheck()){return new Error("HUH???");}
+
+    console.log("closer...")
+
+    startingTurn = turnList.children[0];
+
+    if((deadSkip && innitArr[0].hp <= 0) || (hiddenSkip && innitArr[0].hidden)){
+        moveTurn(true);
+        startingTurn = turnList.children[turnCount];
+    }
+
+    console.log
+
     setCurrStyle(startingTurn);
 }
 
@@ -248,7 +284,11 @@ async function getCurrTurn(){
 }
 
 /* Move the turn counter forwards/backwards */
+
+/* TODO: Check hidden elements ahead/behind, then skip if option is selected */
 async function moveTurn(isForwards){
+
+    if(await infRoundLoopCheck()){return;}
 
     if(!isForwards){
         isForwards = false;
@@ -256,16 +296,50 @@ async function moveTurn(isForwards){
 
     const turnElems = document.getElementById("list-container").children;
     const currTurn = await getCurrTurn();
-    let nextTurn;
+
+    const deadSkip = document.getElementById("deadSkip").checked;
+    const hiddenSkip = document.getElementById("hiddenSkip").checked;
+
     let checkedTurnCount;
+    let nextTurn;
+
+    // On forward movement, skip hidden elems and cycle back to start if final elem is hidden
+
     if(isForwards){
-        checkedTurnCount = await roundCountCheck(++turnCount);
+        turnCount++;
+        checkedTurnCount = await roundCountCheck(turnCount);
         nextTurn = currTurn.nextElementSibling;
+            while(hiddenSkip && innitArr[turnCount].hidden){
+                ++turnCount;
+                checkedTurnCount = await roundCountCheck(turnCount);
+                nextTurn = turnElems[checkedTurnCount];
+            }
+           if(deadSkip){
+                while(innitArr[turnCount].hp <= 0){
+                    ++turnCount;
+                    checkedTurnCount = await roundCountCheck(turnCount);
+                    nextTurn = turnElems[checkedTurnCount];
+                }
+            } 
     }
     else{
-        checkedTurnCount = await roundCountCheck(--turnCount);
+        turnCount--;
+        checkedTurnCount = await roundCountCheck(turnCount);
         nextTurn = currTurn.previousElementSibling;
+            while(hiddenSkip && innitArr[turnCount].hidden){
+                --turnCount;
+                checkedTurnCount = await roundCountCheck(turnCount);
+                nextTurn = turnElems[checkedTurnCount];
+            }
+            if(deadSkip){
+                while(innitArr[turnCount].hp <= 0){
+                    --turnCount;
+                    checkedTurnCount = await roundCountCheck(turnCount);
+                    nextTurn = turnElems[checkedTurnCount]; 
+                }
+            }
     }
+
     console.log("Curr Turn Position: ", checkedTurnCount);
     clearCurrStyle(currTurn);
     console.log("Turn elements: ", turnElems);
@@ -301,6 +375,30 @@ async function roundCountUpdate(newRoundCount){
     roundCountDisplay.innerText = newRoundCount;
 }
 
+
+/* Check if the initative order will loop infinitely because of only hidden or dead turns */
+
+async function infRoundLoopCheck() {
+    const deadSkip = document.getElementById("deadSkip").checked;
+    const hiddenSkip = document.getElementById("hiddenSkip").checked;
+    
+    if(!hiddenSkip && !deadSkip){
+        return false;
+    }
+
+    if(hiddenSkip && innitArr.find((item) => item.hidden == false) != undefined){
+        return false;
+    }
+
+    if(deadSkip && innitArr.find((item) => item.hp > 0) != undefined){
+        return false;
+    }
+
+    window.alert("ERROR: Current initiative configuration will lead to infinite loop.\n Check config settings for issue.");
+
+    return true;
+}
+    
 function setCurrStyle(item){
     item.classList.add("round-curr");
 }
@@ -313,7 +411,7 @@ function resizeRound(){
     const roundContainer = document.getElementById("round-display");
     const button = document.getElementById("round-resize");
     const upperHeight = 350;
-    const lowerHeight = 125;
+    const lowerHeight = 150;
     let isFlipped = (button.className == "flipped") ? true : false;
     let height = roundContainer.offsetHeight;
     console.log(`Round Counter Height: `, height);
@@ -334,7 +432,11 @@ function editItem(event){
         const targetId = eventTarget.id;
         /* Replaces all non-numbers with whitespace */
         const parsedId = targetId.replace(/^\D+/g, '');
-        const targetItem = innitArr[parsedId]; 
+        const targetItem = innitArr[parsedId];
+        let checkedHtml ="";
+        if(targetItem.hidden){
+            checkedHtml = "checked";
+        }
         console.log(`Editing item ${parsedId}...`);
         screenPanel.className = "fade-active";
     
@@ -348,6 +450,8 @@ function editItem(event){
         <div class="panel-option">
             <label for="num-edit">Initative Value</label><br>
             <input type="number" id="num-edit" placeholder="0" value="${targetItem.num}">
+            <input type="checkbox" id="hide-edit" ${checkedHtml}>
+            <label for="innitHide">Hide Initiative</label>
         </div>
         <div id="options-button-panel">
             <button id="cancel" onclick="editCancel()">Cancel</button>
@@ -380,15 +484,18 @@ function editCancel(){
     optionsPanel.remove();
 }
 
-function editConfirm(innitId){
+async function editConfirm(innitId){
     const newName = document.getElementById("name-edit").value;
     const newNum = parseInt(document.getElementById("num-edit").value);
+    const isHidden = document.getElementById("hide-edit").checked;
     const item = innitArr[innitId];
-    item.name = newName, item.num = newNum;
+    item.name = newName, item.num = newNum, item.hidden = isHidden;
     try{
-        sortList();
+       await sortList();
+       await refreshHidden();
     }
     catch(error){
+        console.error(error);
         return new Error(error);
     }
     editCancel();
