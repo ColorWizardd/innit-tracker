@@ -7,10 +7,10 @@ const server = new WebSocket.Server({
 console.log("Server ready!");
 
 server.on('connection', (ws) => {
-  
-  while(ws.readyState == 0){setTimeout(50);}
-  console.log("Client Connected!");
+  setTimeout(() => {}, 500);
   ws.send("YOU IN MY HOUSE NOW, BIYATCH!");
+  console.log("Client Connected!");
+  
 
   ws.on('message', function(message) {
     try{

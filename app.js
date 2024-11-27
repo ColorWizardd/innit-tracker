@@ -1,3 +1,13 @@
+const connection = new WebSocket("ws://localhost:30000");
+connection.addEventListener("open", () => {
+    console.log("Connected!");
+    connection.send("Test Line");
+     });
+connection.addEventListener("message", (message) =>{
+    console.log(`Message Received: ${message.data}`);
+});
+            
+
 /* --  Innit List Functionality -- */
 
 class InnitItem{
@@ -13,6 +23,8 @@ class InnitItem{
 
 const innitArr = [];
 const listImg = "assets/innitd20list.png"
+
+let saveList = []; // SAVED ARRAYS
 
 
 async function sortedInsert(item){
@@ -82,7 +94,6 @@ async function listSearch(newVal){
 }
 
 async function fetchItemInput(){
-    const innitList = document.getElementById("list-container");
     let nameBox = document.getElementById("innitName");
     let initBox = document.getElementById("innitNum");
     let hiddenCheck = document.getElementById("innitHide");
@@ -394,4 +405,30 @@ function editDelete(innitId){
         return new Error(error);
     }
     editCancel();
+}
+
+/* -- DATA INTERACTING WITH SERVER -- */
+
+async function sendInnitArr(arr, listName){
+    const execTime = Date.now().valueOf();
+    execTime.toString().concat("-", saveList.length);
+    let checkedListName = listName || `List ${saveList.length}`;
+    let newList = 
+        {
+            "listName" : checkedListName,
+            "listItems" : [arr]
+        };
+    let packagedList = JSON.stringify(newList);
+    
+    try {
+        saveList.push(newList);
+        localStorage.setItem(`list-${saveList.length}`, packagedList);
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+async function sendActiveArr(name){
+    await sendInnitArr(innitArr, name);
 }
