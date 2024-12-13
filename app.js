@@ -514,22 +514,21 @@ function editDelete(innitId){
     editCancel();
 }
 
-/* -- DATA INTERACTING WITH SERVER -- */
+/* -- DATA INTERACTING WITH SERVER / LOCAL STORAGE -- */
 
 async function sendInnitArr(arr, listName){
-    const execTime = Date.now().valueOf();
-    execTime.toString().concat("-", saveList.length);
-    let checkedListName = listName || `List ${saveList.length}`;
+    let checkedListName = listName || `List-${saveList.length}`;
     let newList = 
         {
+            "listId" : saveList.length,
             "listName" : checkedListName,
-            "listItems" : [arr]
+            "listItems" : arr
         };
-    let packagedList = JSON.stringify(newList);
     
     try {
         saveList.push(newList);
-        localStorage.setItem(`list-${saveList.length}`, packagedList);
+        let packagedList = JSON.stringify(saveList);
+        localStorage.setItem("Saved-Lists", packagedList);
     } catch (error) {
         console.error(error);
     }
@@ -538,4 +537,34 @@ async function sendInnitArr(arr, listName){
 
 async function sendActiveArr(name){
     await sendInnitArr(innitArr, name);
+}
+
+async function fetchSavedLists(){
+    const data = localStorage.getItem("Saved-Lists");
+    const savedLists = JSON.parse(data);
+    saveList = savedLists;
+}
+
+function clearSavedLists(){
+    localStorage.removeItem("Saved-Lists");
+    saveList = [];
+}
+
+/* -- CLIENT LIST MANAGEMENT -- */
+
+async function clearActiveList(){
+    const itemList = document.getElementById("list-container");
+    itemList.innerHTML = "";
+    innitArr = [];
+}
+
+async function loadSavedList(listId){
+    const newList = saveList[listId].listItems;
+    for(item in newList){
+        innitArr.push(newList[item]);
+    }
+
+    for(item in innitArr){
+        sortedInsert(innitArr[item]);
+    }
 }
