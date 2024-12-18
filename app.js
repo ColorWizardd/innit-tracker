@@ -1,11 +1,12 @@
 const connection = new WebSocket("ws://localhost:30000");
 connection.addEventListener("open", () => {
     console.log("Connected!");
-    connection.send("Test Line");
+    connection.send(JSON.stringify({msg: "Test Line"}));
      });
 connection.addEventListener("message", (message) =>{
     console.log(`Message Received: ${message.data}`);
 });       
+
 /* --  Innit List Functionality -- */
 
 class InnitItem{
@@ -516,7 +517,7 @@ function editDelete(innitId){
 
 /* -- DATA INTERACTING WITH SERVER / LOCAL STORAGE -- */
 
-async function sendInnitArr(arr, listName){
+async function saveInnitArr(arr, listName){
     let checkedListName = listName || `List-${saveList.length}`;
     let newList = 
         {
@@ -535,8 +536,8 @@ async function sendInnitArr(arr, listName){
 
 }
 
-async function sendActiveArr(name){
-    await sendInnitArr(innitArr, name);
+async function saveActiveArr(name){
+    await saveInnitArr(innitArr, name);
 }
 
 async function fetchSavedLists(){
@@ -549,6 +550,18 @@ function clearSavedLists(){
     localStorage.removeItem("Saved-Lists");
     saveList = [];
 }
+
+/*  TODO: Add framework to sync updates from config to display */
+
+function sendList(listId, command){
+    let itemData = saveList[listId].listItems;
+    let data = {
+        items : itemData,
+        type : command
+    }
+    connection.send(JSON.stringify(data));
+}
+
 
 /* -- CLIENT LIST MANAGEMENT -- */
 

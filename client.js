@@ -1,6 +1,30 @@
 /* WEBSOCKET FUNCTIONALITY */
 
+const connection = new WebSocket("ws://localhost:30000");
+connection.addEventListener("open", () => {
+    console.log("Connected!");
+    connection.send(JSON.stringify({msg: "Test Line"}));
+     });
+connection.addEventListener("message", (message) =>{
+    console.log(`Message Received: ${message.data}`);
+});
+
+/* MESSAGE HANDLING */
+
+
+
+/* LIST GENERATION */
+
 /* SCROLLING INNIT LIST */
+
+/*
+
+Okay, reeeeallly need to revamp the code.
+    - Currently needs to be able to move forwards and backwards,
+    - Use data from the innitArr to display each item's info,
+    - Add space for displaying the current round,
+
+*/
 
 let innitIndex = 0;
 let roundCount = 1;
