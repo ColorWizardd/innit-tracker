@@ -14,7 +14,7 @@ body{
     text-shadow: 4px 4px 10px black;
 }
 
-#navbar{
+/* #navbar{
     position: absolute;
     top: 0;
     left: 0;
@@ -99,6 +99,116 @@ body{
 
 .innit-group h1{
     text-transform: capitalize;
+}
+
+*/
+
+/* NEW DISPLAY CSS HERE */
+
+#list-cont{
+    height: 50%;
+    width: 33%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-content: center;
+    justify-content: space-evenly;
+    transition: 0.6s ease-out;
+}
+
+.card-cont{
+    position: relative;
+    transition: 0.2s ease-out;
+    animation: 0.6s cardSlide ease-out;
+}
+
+.item-card{
+    position: relative;
+    padding: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 7%;
+    align-items: center;
+    color: rgba(0, 0, 0, 80%);
+    font-family: 'chelsea-market', serif;
+    text-shadow: none;
+    background-image: url("./assets/DisplayCardTexture.webp");
+    background-repeat: repeat;
+    background-size: auto;
+    border-image: url("./assets/BorderLines.webp") 33;
+    border-image-width: 25px;
+    border-radius: 5px;
+    text-align: center;
+    height: 510px;
+    transform-origin: center ;
+    transform: scale(1) rotate(0deg) translate(0,0);
+
+    transition: 0.2s ease-out;
+}
+
+.innit-cont{
+    width: 50px;
+    height: 50px;
+    align-content: center;
+    text-align: center;
+    border: 3px solid rgba(0, 0, 0, 80%);
+    border-radius: 50% 46% 48% 55%;
+    font-size: 32px;
+}
+
+.name-cont{
+    width: 100%;
+    padding-top: 5px;
+    font-size: 32px;
+    border-style: solid;
+    border-width: 0 0 10px 0;
+    border-image: url("./assets/BorderLines.webp") 13 13 12 13 repeat repeat;
+}
+
+.card-image-cont{
+    width: 100%;
+    height: 40%;
+    padding-bottom: 0;
+}
+
+.card-image{
+    width: auto;
+    height: 100%;
+}
+
+.card-hp, .card-stats{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+    font-size: 24px;
+}
+
+.item-card .hp-cont{
+    height: 15px;
+}
+
+.card-stats{
+    padding-bottom: 5px;
+    justify-content: center;
+    width: 100%;
+    border-style: solid;
+    border-width: 0 0 10px 0;
+    border-image: url("./assets/BorderLines.webp") 13 13 12 13 repeat repeat;
+}
+
+.curr{
+    animation: currSelect 0.4s ease-out forwards;
+}
+
+.stacked-card{
+    margin-right: -150px;
+    transition: inherit;
 }
 
 /* INDEX PAGE CSS */
@@ -461,7 +571,47 @@ footer{
     pointer-events: all;
 }
 
+/* FONTS */
+
 @font-face {
     font-family: 'spectral';
     src: url('fonts/Spectral/Spectral-Regular.ttf');
+}
+
+@font-face{
+    font-family: 'chelsea-market';
+    src: url('fonts/Chelsea-Market/ChelseaMarket-Regular.ttf');
+}
+
+/* ANIMATIONS */
+
+.paused{
+    animation-play-state: paused;
+}
+
+@keyframes cardDeal {
+    from{
+        transform: rotate(-130deg);
+    }
+    to{
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes cardSlide {
+    from{
+        transform: translateY(-200%) rotate(-130deg);
+    }
+    to{
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes currSelect {
+    from{
+        transform: scale(1);
+    }
+    to{
+        transform: scale(1.5);
+    }
 }

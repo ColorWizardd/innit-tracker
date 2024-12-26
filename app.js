@@ -568,7 +568,7 @@ function sendList(listId, command){
 async function clearActiveList(){
     const itemList = document.getElementById("list-container");
     itemList.innerHTML = "";
-    innitArr = [];
+    innitArr.length = 0;
 }
 
 async function loadSavedList(listId){

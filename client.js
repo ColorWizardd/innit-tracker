@@ -5,17 +5,143 @@ connection.addEventListener("open", () => {
     console.log("Connected!");
     connection.send(JSON.stringify({msg: "Test Line"}));
      });
-connection.addEventListener("message", (message) =>{
-    console.log(`Message Received: ${message.data}`);
+connection.addEventListener("message", async (message) =>{
+    let dataInput = message.data;
+    console.log(`Message Received: ${dataInput}`);
+    await commandParse(dataInput);
 });
 
 /* MESSAGE HANDLING */
+
+async function commandParse(data){
+    let newCommand = JSON.parse(data) || undefined;
+    console.log("Message JSON:", newCommand);
+    if(newCommand.msg){console.log(newCommand.msg);}
+    let commandType = newCommand.type;
+
+    switch(commandType){
+        case "newList" :
+
+        await generateList(newCommand);
+        
+        case "editItem" :
+        
+        case "addItem" :
+        
+        case "deleteItem" :
+        
+        case "turnForward" :
+        
+        case "turnBackward" :
+        
+        default :
+        console.log("no command detected.");
+        break;
+    }
+}
 
 
 
 /* LIST GENERATION */
 
+const listContainer = document.getElementById("list-cont");
+let delayVal = 700;
+let widthVal = 0;
+ function dealDelay(itemCount){
+    return new Promise(resolve => setTimeout(resolve, (delayVal / itemCount)));
+};
+
+async function generateList(itemList){
+    const items = itemList.items;
+    for(obj in items){
+        listContainer.appendChild(await addItem(items[obj]));
+    }
+
+    for(obj in items){
+        listContainer.children[obj].classList.remove("paused")
+        await dealDelay(items.length);
+    }
+
+    await dealDelay(items.length);
+    for(obj in items){
+        listContainer.children[obj].classList.remove("stacked-card");
+        await dealDelay(items.length)
+    }
+
+    listContainer.style.width = "100%";
+    await dealDelay(items.length);
+    initialCurr();
+}
+
+function clearCurrList(){
+
+}
+
+/* 
+
+-- ITEM STRUCTURE --
+(Order of priority)
+- Innit value
+- Item name
+- Item curr/max hp (Optional?)
+    - Use a two-color fill or changing shade to indicate relative hp?
+
+*/
+
+async function addItem(item){
+
+    console.log("item data:", item);
+    let newItem = document.createElement("div");
+    newItem.classList.add("card-cont","stacked-card","paused");
+    newItem.id = `item-${item.id}`;
+    newItem.innerHTML =
+     `
+        <article class="item-card">
+            <section class="name-cont">
+                <span class="card-name">${item.name}</span>
+            </section>
+            <section class="card-image-cont">
+                <img class="card-image" alt="Card Image" src="./assets/TestIcon.png">
+            </section>
+            <section class="card-stats">
+                <section class="innit-cont">
+                    <span class="innit-val">${item.num}</span>
+                </section>
+            </section>
+            <section class="card-hp">
+                <span class="hp-curr">${item.hp}</span>
+                <div class="hp-cont"><div class="hp-back"></div></div>
+                <span class="hp-max">${item.hpMax}</span>
+            </section>
+        </article>
+    `
+    return newItem;
+        
+}
+
+function initialCurr(){
+    let firstItem = listContainer.children[0];
+    firstItem.classList.add("curr");
+}
+
+/* CARD ANIMATIONS */
+
+function hpScale(itemIndex, newCurrHp, newMaxHp){
+    let hpCont = listContainer.getElementsByClassName("card-hp")[itemIndex];
+    let currHp = hpCont.children[0];
+    let maxHp = hpCont.children[2];
+    let hpBar = listContainer.getElementsByClassName("hp-back")[itemIndex];
+
+    currHp.innerHTML = `${newCurrHp}`;
+    maxHp.innerHTML = `${newMaxHp}`;
+
+    hpBar.style.width = `${100 - ((newCurrHp/newMaxHp).toFixed(2)*100)}%`
+}
+
 /* SCROLLING INNIT LIST */
+
+
+
 
 /*
 
@@ -23,8 +149,13 @@ Okay, reeeeallly need to revamp the code.
     - Currently needs to be able to move forwards and backwards,
     - Use data from the innitArr to display each item's info,
     - Add space for displaying the current round,
+    - (IN CSS) Restyle the display for smoother, simpler feel
+    - (IN CSS) Tweak list movement
+    
 
 */
+
+/*
 
 let innitIndex = 0;
 let roundCount = 1;
@@ -92,3 +223,4 @@ function scrollNext(){
     innitIndex++;
     rotateList();
 }
+*/
