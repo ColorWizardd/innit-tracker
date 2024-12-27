@@ -13,6 +13,8 @@ connection.addEventListener("message", async (message) =>{
 
 /* MESSAGE HANDLING */
 
+const listData = [];
+
 async function commandParse(data){
     let newCommand = JSON.parse(data) || undefined;
     console.log("Message JSON:", newCommand);
@@ -21,6 +23,7 @@ async function commandParse(data){
 
     switch(commandType){
         case "newList" :
+        listData.length = 0;
 
         await generateList(newCommand);
         
@@ -55,6 +58,7 @@ async function generateList(itemList){
     const items = itemList.items;
     for(obj in items){
         listContainer.appendChild(await addItem(items[obj]));
+        cardHpScale(obj, items[obj].hp, items[obj].hpMax);
     }
 
     for(obj in items){
@@ -126,7 +130,7 @@ function initialCurr(){
 
 /* CARD ANIMATIONS */
 
-function hpScale(itemIndex, newCurrHp, newMaxHp){
+function cardHpScale(itemIndex, newCurrHp, newMaxHp){
     let hpCont = listContainer.getElementsByClassName("card-hp")[itemIndex];
     let currHp = hpCont.children[0];
     let maxHp = hpCont.children[2];
@@ -135,7 +139,7 @@ function hpScale(itemIndex, newCurrHp, newMaxHp){
     currHp.innerHTML = `${newCurrHp}`;
     maxHp.innerHTML = `${newMaxHp}`;
 
-    hpBar.style.width = `${100 - ((newCurrHp/newMaxHp).toFixed(2)*100)}%`
+    hpBar.style.width = `${((newCurrHp/newMaxHp).toFixed(2)*100)}%`
 }
 
 /* SCROLLING INNIT LIST */
