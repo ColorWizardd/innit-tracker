@@ -72,7 +72,7 @@ async function generateList(itemList){
     const firstElem = listContainer.children[0];
 
     await dealDelay(items.length);
-    
+
     firstElem.addEventListener("animationend", () =>{
         initialCurr();
     })
@@ -130,11 +130,6 @@ function initialCurr(){
 }
 
 /* CARD ANIMATIONS */
-
-function setStartingPos(){
-    let itemTotal = listContainer.children.length;
-
-}
 
 function cardHpScale(itemIndex, newCurrHp, newMaxHp){
     let hpCont = listContainer.getElementsByClassName("card-hp")[itemIndex];
