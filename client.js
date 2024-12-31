@@ -47,34 +47,35 @@ async function commandParse(data){
 
 /* LIST GENERATION */
 
-const listContainer = document.getElementById("list-cont");
-let delayVal = 700;
-let widthVal = 0;
+const listContainer = document.getElementById("list-card-cont");
+let delayVal = 850;
+let widthVal = 40;
+let cardOffset = widthVal*2
  function dealDelay(itemCount){
     return new Promise(resolve => setTimeout(resolve, (delayVal / itemCount)));
 };
 
 async function generateList(itemList){
     const items = itemList.items;
+    setStartingPos();
     for(obj in items){
         listContainer.appendChild(await addItem(items[obj]));
         cardHpScale(obj, items[obj].hp, items[obj].hpMax);
     }
 
-    for(obj in items){
-        listContainer.children[obj].classList.remove("paused")
+    for(let i = (items.length-1); i >= 0; i--){
         await dealDelay(items.length);
+        listContainer.children[i].classList.remove("paused")
+        console.log(`Currently on item ${i}`)
     }
 
-    await dealDelay(items.length);
-    for(obj in items){
-        listContainer.children[obj].classList.remove("stacked-card");
-        await dealDelay(items.length)
-    }
+    const firstElem = listContainer.children[0];
 
-    listContainer.style.width = "100%";
     await dealDelay(items.length);
-    initialCurr();
+    
+    firstElem.addEventListener("animationend", () =>{
+        initialCurr();
+    })
 }
 
 function clearCurrList(){
@@ -96,7 +97,7 @@ async function addItem(item){
 
     console.log("item data:", item);
     let newItem = document.createElement("div");
-    newItem.classList.add("card-cont","stacked-card","paused");
+    newItem.classList.add("card-cont","paused");
     newItem.id = `item-${item.id}`;
     newItem.innerHTML =
      `
@@ -130,6 +131,11 @@ function initialCurr(){
 
 /* CARD ANIMATIONS */
 
+function setStartingPos(){
+    let itemTotal = listContainer.children.length;
+
+}
+
 function cardHpScale(itemIndex, newCurrHp, newMaxHp){
     let hpCont = listContainer.getElementsByClassName("card-hp")[itemIndex];
     let currHp = hpCont.children[0];
@@ -144,7 +150,9 @@ function cardHpScale(itemIndex, newCurrHp, newMaxHp){
 
 /* SCROLLING INNIT LIST */
 
+function scrollNext(isForwards){
 
+}
 
 
 /*
