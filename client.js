@@ -57,7 +57,6 @@ let cardOffset = widthVal*2
 
 async function generateList(itemList){
     const items = itemList.items;
-    setStartingPos();
     for(obj in items){
         listContainer.appendChild(await addItem(items[obj]));
         cardHpScale(obj, items[obj].hp, items[obj].hpMax);
