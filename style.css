@@ -12,7 +12,6 @@ body{
     font-family: 'spectral', 'sans-serif';
     overflow: hidden;
     background-color: rgb(46, 48, 48);
-    background-image: linear-gradient(to bottom, #b77c4f, #91643c, #6d4d2b, #4c371c, #2e210d);
     color:rgb(217, 217, 217);
     text-shadow: 4px 4px 10px black;
 }
