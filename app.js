@@ -256,6 +256,73 @@ async function refreshHidden(){
 let roundCount = 0;
 let turnCount = 0;
 
+/* -- Encounter Dialog Launch -- */
+
+function storeCookie(name, value, days){
+    let expireTime = "";
+    if(days){
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expireTime = `; expires=${date.toUTCString()}`
+    }
+    document.cookie = `${name}=${value || ""}; expires=${expireTime}`
+}
+// Cookies will last 1 day by default
+
+function getCookie(name){
+    let nameFixed = name += "=";
+    let cookieArr = document.cookie.split(";");
+    for(cookie of cookieArr){
+        let currCookie = String(cookie.trim());
+        if (currCookie.indexOf(nameFixed) == 0){
+            return currCookie.substring(nameFixed.length,currCookie.length);
+        }
+    }
+    return undefined;
+}
+
+// TODO: ENSURE DELETION OF EXPIRED COOKIES
+async function storeSessionId(){
+    let idArr = new Uint32Array(4);
+    crypto.getRandomValues(idArr);
+    let newId = String(idArr.join(''));
+    storeCookie("Innit-Session-ID", newId, 1);
+}
+
+async function getSessionId(){
+    try{
+        return getCookie("Innit-Session-ID");
+    }
+    catch{
+        console.error("Session ID does not exist or is undefined.\nAttempting to create new id...");
+        await storeSessionId();
+    }
+}
+
+// Window Launch Handling
+
+const dialogUrl = "./dialog.html";
+
+async function newDialog(sessionId, innitArr) {
+    window.open(`${dialogUrl};Innit-Session-ID=${sessionId}`);
+}
+
+async function launchEncounter(){
+    let id;
+    try{
+        id = getSessionId();
+        await newDialog(id, innitArr);
+    }
+    catch(error){
+        console.error(error);
+        return new Error(error);
+    }
+}
+
+/* -- "Legacy" Encounter Turn Manips -- */
+
+
+
 async function initialTurn(){
     const deadSkip = document.getElementById("deadSkip").checked;
     const hiddenSkip = document.getElementById("hiddenSkip").checked;
@@ -581,3 +648,4 @@ async function loadSavedList(listId){
         sortedInsert(innitArr[item]);
     }
 }
+
