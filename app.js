@@ -283,7 +283,7 @@ function getCookie(name){
 
 // TODO: ENSURE DELETION OF EXPIRED COOKIES
 async function storeSessionId(){
-    let idArr = new Uint32Array(4);
+    let idArr = new Uint16Array(2);
     crypto.getRandomValues(idArr);
     let newId = String(idArr.join(''));
     storeCookie("Innit-Session-ID", newId, 1);
@@ -301,16 +301,15 @@ async function getSessionId(){
 
 // Window Launch Handling
 
-const dialogUrl = "./dialog.html";
-
 async function newDialog(sessionId, innitArr) {
-    window.open(`${dialogUrl};Innit-Session-ID=${sessionId}`);
+    let dialogUrl = `./dialog.html?session=${encodeURIComponent(sessionId)}`;
+    window.open(`${dialogUrl}`);
 }
 
 async function launchEncounter(){
     let id;
     try{
-        id = getSessionId();
+        id = await getSessionId();
         await newDialog(id, innitArr);
     }
     catch(error){
@@ -479,7 +478,7 @@ function resizeRound(){
     const roundContainer = document.getElementById("round-display");
     const button = document.getElementById("round-resize");
     const upperHeight = 350;
-    const lowerHeight = 150;
+    const lowerHeight = 175;
     let isFlipped = (button.className == "flipped") ? true : false;
     let height = roundContainer.offsetHeight;
     console.log(`Round Counter Height: `, height);
