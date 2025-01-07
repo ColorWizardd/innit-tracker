@@ -24,6 +24,37 @@ const localConfig = fetch("./settings.json");
 const innitArr = [];
 const listImg = "assets/innitd20list.png";
 
+// Setting Session ID on load
+const sessionCookie = getSessionId();
+
+// ONLOAD FUNCTIONS
+window.onload = () =>{
+    fetchSavedLists();
+
+    const submitButton = document.getElementById("submit-button");
+    submitButton.addEventListener("click", function(e){
+        addInputItem();
+    });
+    const roundSizeButton = document.getElementById("round-resize");
+    roundSizeButton.addEventListener("click", function(e){
+        resizeRound();
+    });
+
+    const startButton = document.getElementById("start-encounter");
+    startButton.addEventListener("click", function(e){
+        launchEncounter();
+    });
+    const roundPrev = document.getElementById("round-prev");
+    roundPrev.addEventListener("click", function(e){
+        moveTurn(false);
+    });
+    const roundNext = document.getElementById("round-next");
+    roundNext.addEventListener("click", function(e){
+        moveTurn(true);
+    });
+}
+
+
 let saveList = []; // SAVED ARRAYS
 
 
@@ -46,13 +77,13 @@ async function sortedInsert(item){
     let newLi = document.createElement("li");
     newLi.className = `list-innit-item hidden-${newItem.hidden}`;
     newLi.innerHTML = 
-        `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}" onclick="editItem(event)">
+        `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}">
         <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>
         <div class="hp-cont" id="hp-${newItem.id}">
-        <div class="hp-back"></div>
-        <div class="hp-val">
-        <input type="number" class="hp-curr" value="${newItem.hp}" onchange="hpUpdate(event)">
-        </input>/<input type="number" class="hp-max" value="${newItem.hpMax}" onchange="hpUpdate(event)"></input>
+            <div class="hp-back"></div>
+            <div class="hp-val">
+                <input type="number" class="hp-curr" value="${newItem.hp}">
+            </input>/<input type="number" class="hp-max" value="${newItem.hpMax}"></input>
         </div>
         </div>
         `
@@ -65,7 +96,25 @@ async function sortedInsert(item){
         innitList.insertBefore(newLi, listItems[newIndex]);
     }
 
-    console.log("Innit Array is now: ", innitArr);
+    // ADDING LISTENER TO EACH ICON FOR EDITING
+
+    const itemIcon = document.getElementById(`item-${newItem.id}`);
+    itemIcon.addEventListener("click", function(e){
+        editItem(e);
+    });
+
+    // ADDING LISTENERS FOR HPCURR AND HPMAX FOR UPDATES
+
+    const hpCurr = newLi.getElementsByClassName("hp-curr")[0];
+    hpCurr.addEventListener("change", function(e){
+        hpUpdate(e);
+    });
+
+    const hpMax = newLi.getElementsByClassName("hp-max")[0];
+    hpMax.addEventListener("change", function(e){
+        hpUpdate(e);
+    });
+
     scaleAllHp();
 }
 
@@ -77,17 +126,13 @@ async function listSearch(newVal){
     console.log(`Length before insert: `, end);
 
     if(start == end){
-        console.log(`Inserting value ${newVal} at index START`);
         return 0;
     }
     for(i = start; i < end; i++){
         if(innitArr[i].num <= newVal){
-            console.log(`${newVal} is bigger than ${innitArr[i].num}`)
-            console.log(`Inserting value ${newVal} at index ${i}`);
             return i;
         }
     }
-    console.log(`Inserting value ${newVal} at index END`);
     return end;
 
     
@@ -139,20 +184,16 @@ function refreshId(){
 
 async function sortList(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
-    console.log("Sorting array...");
     try{
         innitArr.sort((a, b) => b.num - a.num);
         for(item in elems){
             if(isNaN(item)){
-                console.log("No more elements left!");
                 break;
             }
-            console.log(`Currently on item ${item}`);
             let diceImg = elems[item].firstChild;
             let innitNum = diceImg.nextElementSibling;
             let innitName = innitNum.nextElementSibling;
             diceImg.id = `item-${item}`;
-            console.log(`Item: ${item}, Name: ${innitArr[item].name}, Num: ${innitArr[item].num}`);
             innitNum.textContent = innitArr[item].num;
             innitName.textContent = innitArr[item].name;
         }
@@ -202,15 +243,12 @@ async function hpScale(targetId, currHp, maxHp){
 
 async function scaleAllHp(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
-    console.log("HP Elems Count: ", elems.length);
     for(item in elems){
         if(isNaN(item)){
-            console.log("Scaled all HP bars!");
             break;
         }
         let hpParent = elems[item].children[3];
         let hpBar = hpParent.children[1];
-        console.log("HP BAR: ", hpBar);
         let hpCurr = hpBar.firstElementChild;
         let hpMax = hpBar.children[1];
 
@@ -219,15 +257,8 @@ async function scaleAllHp(){
         let newHp = innitArr[item].hp;
         let newHpMax = innitArr[item].hpMax;
 
-        console.log("Curr Bar: ", hpCurr);
-        console.log("Curr Bar Max: ", hpMax);
         hpCurr.value = newHp;
         hpMax.value = newHpMax;
-        console.log({
-            "HP ID" : item,
-            "HP CURR: " : newHp,
-            "HP MAX: " : newHpMax
-        })
         await hpScale(item, newHp, newHpMax);
 
     }
@@ -241,11 +272,9 @@ async function refreshHidden(){
     for(let item = 0; item < elems.length; item++){
         console.log(innitArr[item]);
         if(innitArr[item].hidden == true && elems[item].classList.contains("hidden-false")){
-            console.log(`Hiding item number ${item};`);
             elems[item].classList.replace("hidden-false", "hidden-true");
         }
         else if(innitArr[item].hidden == false && elems[item].classList.contains("hidden-true")){
-            console.log(`Revealing item number ${item};`);
             elems[item].classList.replace("hidden-true", "hidden-false");
         }
     }
@@ -265,7 +294,7 @@ function storeCookie(name, value, days){
         date.setTime(date.getTime() + (days*24*60*60*1000));
         expireTime = `; expires=${date.toUTCString()}`
     }
-    document.cookie = `${name}=${value || ""}; expires=${expireTime}`
+    document.cookie = `${name}=${value || ""}; expires=${expireTime}; SameSite=Lax`
 }
 // Cookies will last 1 day by default
 
@@ -283,20 +312,27 @@ function getCookie(name){
 
 // TODO: ENSURE DELETION OF EXPIRED COOKIES
 async function storeSessionId(){
-    let idArr = new Uint16Array(2);
+    let idArr = new Uint8Array(3);
     crypto.getRandomValues(idArr);
-    let newId = String(idArr.join(''));
+    let randChar = String.fromCharCode(97+Math.floor(Math.random() * 26));
+    let newId = String(randChar + idArr.join(''));
     storeCookie("Innit-Session-ID", newId, 1);
 }
 
 async function getSessionId(){
+    let idCookie;
     try{
-        return getCookie("Innit-Session-ID");
+        idCookie = getCookie("Innit-Session-ID");
+        if(idCookie === undefined){
+            throw new ReferenceError;
+        }
     }
-    catch{
+    catch(error){
         console.error("Session ID does not exist or is undefined.\nAttempting to create new id...");
         await storeSessionId();
+        idCookie = getCookie("Innit-Session-ID");
     }
+    finally{return idCookie;}
 }
 
 // Window Launch Handling
@@ -307,9 +343,8 @@ async function newDialog(sessionId, innitArr) {
 }
 
 async function launchEncounter(){
-    let id;
     try{
-        id = await getSessionId();
+       let id = await getSessionId();
         await newDialog(id, innitArr);
     }
     catch(error){
@@ -328,11 +363,7 @@ async function initialTurn(){
     const turnList = document.getElementById("list-container");
     let startingTurn;
 
-    console.log("Aight, so far so good...");
-
     if(await infRoundLoopCheck()){return new Error("HUH???");}
-
-    console.log("closer...")
 
     startingTurn = turnList.children[0];
 
@@ -340,8 +371,6 @@ async function initialTurn(){
         moveTurn(true);
         startingTurn = turnList.children[turnCount];
     }
-
-    console.log
 
     setCurrStyle(startingTurn);
 }
@@ -407,10 +436,7 @@ async function moveTurn(isForwards){
             }
     }
 
-    console.log("Curr Turn Position: ", checkedTurnCount);
     clearCurrStyle(currTurn);
-    console.log("Turn elements: ", turnElems);
-    console.log("New Turn Count: ", checkedTurnCount);
     if(!nextTurn){
         setCurrStyle(turnElems[checkedTurnCount]);
     }
@@ -516,14 +542,14 @@ function editItem(event){
         </div>
         <div class="panel-option">
             <label for="num-edit">Initative Value</label><br>
-            <input type="number" id="num-edit" placeholder="0" value="${targetItem.num}">
+            <input type="number" id="num-edit" placeholder="0" pattern="[0-9]" value="${targetItem.num}">
             <input type="checkbox" id="hide-edit" ${checkedHtml}>
             <label for="innitHide">Hide Initiative</label>
         </div>
         <div id="options-button-panel">
-            <button id="cancel" onclick="editCancel()">Cancel</button>
-            <button id="delete" onclick="editDelete(${parsedId})">Delete</button>
-            <button id="confirm" onclick="editConfirm(${parsedId})">Confirm</button>
+            <button id="cancel">Cancel</button>
+            <button id="delete">Delete</button>
+            <button id="confirm">Confirm</button>
         </div>    
     `
 
@@ -531,7 +557,24 @@ function editItem(event){
     optionsPanel.id = "options-panel";
     docBody.className = "popup";
     optionsPanel.innerHTML = editorHtml;
+
     document.body.insertBefore(optionsPanel, screenPanel);
+
+    // BUTTON LISTENERS FOR EDIT, DELETE, CANCEL
+    const cancelButton = document.getElementById("cancel");
+    cancelButton.addEventListener("click", function(e){
+        editCancel();
+    });
+
+    const deleteButton = document.getElementById("delete");
+    deleteButton.addEventListener("click", function(e){
+        editDelete(parsedId);
+    });
+
+    const confirmButton = document.getElementById("confirm");
+    confirmButton.addEventListener("click", function(e){
+        editConfirm(parsedId);
+    });
 
     /* SORT USING BUILT-IN FUNC WITH item.num, THEN REFRESH IDs
     AND RE-INSERT INTO LIST BY ID
