@@ -7,7 +7,6 @@ connection.addEventListener("open", () => {
      });
 connection.addEventListener("message", async (message) =>{
     let dataInput = message.data;
-    console.log(`Message Received: ${dataInput}`);
     await commandParse(dataInput);
 });
 
@@ -18,7 +17,6 @@ const listData = [];
 async function commandParse(data){
     let newCommand = JSON.parse(data) || undefined;
     console.log("Message JSON:", newCommand);
-    if(newCommand.msg){console.log(newCommand.msg);}
     let commandType = newCommand.type;
 
     switch(commandType){

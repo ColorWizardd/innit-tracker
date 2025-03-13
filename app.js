@@ -1,11 +1,27 @@
-const connection = new WebSocket("ws://localhost:30000");
+const connection = new WebSocket("ws://localhost:30000/index");
+
+window.addEventListener("unload", (e) =>{
+    connection.close();
+  });
+
 connection.addEventListener("open", () => {
     console.log("Connected!");
     connection.send(JSON.stringify({msg: "Test Line"}));
      });
+
 connection.addEventListener("message", (message) =>{
     console.log(`Message Received: ${message.data}`);
-});       
+});
+
+/* IMPLEMENT LATER
+function packageData(command, data, msg){
+    return ({
+        msg: msg,
+        commandType: command,
+        data: data
+    })
+}
+*/
 
 /* --  Innit List Functionality -- */
 
@@ -69,8 +85,6 @@ async function sortedInsert(item){
     const newItem = item;
 
     let newVal = newItem.num;
-    
-    console.log(`Adding value ${newVal} to array for character ${newItem.name}`);
 
     let newIndex = await listSearch(newVal);
     innitArr.splice(newIndex, 0, newItem);
@@ -88,7 +102,6 @@ async function sortedInsert(item){
         </div>
         `
     let listItems = document.getElementsByTagName("li");
-    console.log("List items length before: ", listItems.length);
     if(innitArr.length <= 1){
         innitList.appendChild(newLi);
     }
@@ -122,8 +135,6 @@ async function sortedInsert(item){
 async function listSearch(newVal){
     let start = 0;
     let end = innitArr.length;
-
-    console.log(`Length before insert: `, end);
 
     if(start == end){
         return 0;
@@ -266,11 +277,8 @@ async function scaleAllHp(){
 
 async function refreshHidden(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
-    console.log(elems.length);
-    console.log(innitArr);
     
     for(let item = 0; item < elems.length; item++){
-        console.log(innitArr[item]);
         if(innitArr[item].hidden == true && elems[item].classList.contains("hidden-false")){
             elems[item].classList.replace("hidden-false", "hidden-true");
         }
@@ -312,10 +320,9 @@ function getCookie(name){
 
 // TODO: ENSURE DELETION OF EXPIRED COOKIES
 async function storeSessionId(){
-    let idArr = new Uint8Array(3);
+    let idArr = new Uint8Array(2);
     crypto.getRandomValues(idArr);
-    let randChar = String.fromCharCode(97+Math.floor(Math.random() * 26));
-    let newId = String(randChar + idArr.join(''));
+    let newId = String(idArr.join(''));
     storeCookie("Innit-Session-ID", newId, 1);
 }
 
@@ -335,17 +342,43 @@ async function getSessionId(){
     finally{return idCookie;}
 }
 
+async function storeUserId(){
+    let userArr = new Uint8Array(3);
+    crypto.getRandomValues(userArr);
+    let newUId = String(userArr.join(''));
+    storeCookie("Innit-User-ID", newUId, 7);
+}
+
+async function getSelfId(){
+    let uIdCookie;
+    try{
+        uIdCookie = getCookie("Innit-User-ID");
+        if(uIdCookie === undefined){
+            throw new ReferenceError;
+        }
+    }
+    catch(error){
+        console.error("User ID does not exist or is undefined. \nAttempting to create new id...");
+        await storeUserId();
+        uIdCookie = getCookie("Innit-User-ID");
+    }
+    finally{return uIdCookie};
+}
+
 // Window Launch Handling
 
-async function newDialog(sessionId, innitArr) {
+async function newDialog(sessionId, innitArr, settings) {
     let dialogUrl = `./dialog.html?session=${encodeURIComponent(sessionId)}`;
-    window.open(`${dialogUrl}`);
+    window.open(`${dialogUrl}`, self, settings);
 }
 
 async function launchEncounter(){
     try{
        let id = await getSessionId();
-        await newDialog(id, innitArr);
+       let encounterWindowSettings = (
+        ""
+       );
+        await newDialog(id, innitArr, encounterWindowSettings);
     }
     catch(error){
         console.error(error);
@@ -507,7 +540,6 @@ function resizeRound(){
     const lowerHeight = 175;
     let isFlipped = (button.className == "flipped") ? true : false;
     let height = roundContainer.offsetHeight;
-    console.log(`Round Counter Height: `, height);
     height >= upperHeight ? height = lowerHeight : height = upperHeight;
     roundContainer.style.height = (height + "px");
     isFlipped ? button.className = "unFlipped" : button.className = "flipped";
@@ -521,7 +553,6 @@ function editItem(event){
     const screenPanel = document.getElementById("fade-panel");
     const docBody = document.body;
         let eventTarget = event.target;
-        console.log("Event Target:", eventTarget);
         const targetId = eventTarget.id;
         /* Replaces all non-numbers with whitespace */
         const parsedId = targetId.replace(/^\D+/g, '');
@@ -681,6 +712,7 @@ async function clearActiveList(){
 }
 
 async function loadSavedList(listId){
+    await clearActiveList();
     const newList = saveList[listId].listItems;
     for(item in newList){
         innitArr.push(newList[item]);
