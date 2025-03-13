@@ -24,7 +24,7 @@ console.log("Server ready!");
 
 server.on('connection', (ws, request, client) => {
   setTimeout(() => {}, 500);
-  ws.send(JSON.stringify({msg: "YOU IN MY HOUSE NOW, BIYATCH!"}));
+  ws.send(JSON.stringify({msg: "Server Connected!"}));
   console.log("Client Connected!");
   console.log(request.url);
 
