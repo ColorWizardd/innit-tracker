@@ -1,11 +1,28 @@
-const connection = new WebSocket("ws://localhost:30000");
+const connection = new WebSocket("ws://localhost:30000/index");
+
+window.addEventListener("unload", (e) =>{
+    connection.close();
+  });
+
 connection.addEventListener("open", () => {
     console.log("Connected!");
-    connection.send("Test Line");
+    connection.send(JSON.stringify({msg: "Test Line"}));
      });
+
 connection.addEventListener("message", (message) =>{
     console.log(`Message Received: ${message.data}`);
-});       
+});
+
+/* IMPLEMENT LATER
+function packageData(command, data, msg){
+    return ({
+        msg: msg,
+        commandType: command,
+        data: data
+    })
+}
+*/
+
 /* --  Innit List Functionality -- */
 
 class InnitItem{
@@ -23,6 +40,37 @@ const localConfig = fetch("./settings.json");
 const innitArr = [];
 const listImg = "assets/innitd20list.png";
 
+// Setting Session ID on load
+const sessionCookie = getSessionId();
+
+// ONLOAD FUNCTIONS
+window.onload = () =>{
+    fetchSavedLists();
+
+    const submitButton = document.getElementById("submit-button");
+    submitButton.addEventListener("click", function(e){
+        addInputItem();
+    });
+    const roundSizeButton = document.getElementById("round-resize");
+    roundSizeButton.addEventListener("click", function(e){
+        resizeRound();
+    });
+
+    const startButton = document.getElementById("start-encounter");
+    startButton.addEventListener("click", function(e){
+        launchEncounter();
+    });
+    const roundPrev = document.getElementById("round-prev");
+    roundPrev.addEventListener("click", function(e){
+        moveTurn(false);
+    });
+    const roundNext = document.getElementById("round-next");
+    roundNext.addEventListener("click", function(e){
+        moveTurn(true);
+    });
+}
+
+
 let saveList = []; // SAVED ARRAYS
 
 
@@ -37,26 +85,23 @@ async function sortedInsert(item){
     const newItem = item;
 
     let newVal = newItem.num;
-    
-    console.log(`Adding value ${newVal} to array for character ${newItem.name}`);
 
     let newIndex = await listSearch(newVal);
     innitArr.splice(newIndex, 0, newItem);
     let newLi = document.createElement("li");
     newLi.className = `list-innit-item hidden-${newItem.hidden}`;
     newLi.innerHTML = 
-        `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}" onclick="editItem(event)">
+        `<img class="li-dice-img" src="${listImg}" id="item-${newItem.id}">
         <span class="list-num">${newVal}</span><span class="list-name">${newItem.name}</span>
         <div class="hp-cont" id="hp-${newItem.id}">
-        <div class="hp-back"></div>
-        <div class="hp-val">
-        <input type="number" class="hp-curr" value="${newItem.hp}" onchange="hpUpdate(event)">
-        </input>/<input type="number" class="hp-max" value="${newItem.hpMax}" onchange="hpUpdate(event)"></input>
+            <div class="hp-back"></div>
+            <div class="hp-val">
+                <input type="number" class="hp-curr" value="${newItem.hp}">
+            </input>/<input type="number" class="hp-max" value="${newItem.hpMax}"></input>
         </div>
         </div>
         `
     let listItems = document.getElementsByTagName("li");
-    console.log("List items length before: ", listItems.length);
     if(innitArr.length <= 1){
         innitList.appendChild(newLi);
     }
@@ -64,7 +109,25 @@ async function sortedInsert(item){
         innitList.insertBefore(newLi, listItems[newIndex]);
     }
 
-    console.log("Innit Array is now: ", innitArr);
+    // ADDING LISTENER TO EACH ICON FOR EDITING
+
+    const itemIcon = document.getElementById(`item-${newItem.id}`);
+    itemIcon.addEventListener("click", function(e){
+        editItem(e);
+    });
+
+    // ADDING LISTENERS FOR HPCURR AND HPMAX FOR UPDATES
+
+    const hpCurr = newLi.getElementsByClassName("hp-curr")[0];
+    hpCurr.addEventListener("change", function(e){
+        hpUpdate(e);
+    });
+
+    const hpMax = newLi.getElementsByClassName("hp-max")[0];
+    hpMax.addEventListener("change", function(e){
+        hpUpdate(e);
+    });
+
     scaleAllHp();
 }
 
@@ -73,20 +136,14 @@ async function listSearch(newVal){
     let start = 0;
     let end = innitArr.length;
 
-    console.log(`Length before insert: `, end);
-
     if(start == end){
-        console.log(`Inserting value ${newVal} at index START`);
         return 0;
     }
     for(i = start; i < end; i++){
         if(innitArr[i].num <= newVal){
-            console.log(`${newVal} is bigger than ${innitArr[i].num}`)
-            console.log(`Inserting value ${newVal} at index ${i}`);
             return i;
         }
     }
-    console.log(`Inserting value ${newVal} at index END`);
     return end;
 
     
@@ -138,20 +195,16 @@ function refreshId(){
 
 async function sortList(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
-    console.log("Sorting array...");
     try{
         innitArr.sort((a, b) => b.num - a.num);
         for(item in elems){
             if(isNaN(item)){
-                console.log("No more elements left!");
                 break;
             }
-            console.log(`Currently on item ${item}`);
             let diceImg = elems[item].firstChild;
             let innitNum = diceImg.nextElementSibling;
             let innitName = innitNum.nextElementSibling;
             diceImg.id = `item-${item}`;
-            console.log(`Item: ${item}, Name: ${innitArr[item].name}, Num: ${innitArr[item].num}`);
             innitNum.textContent = innitArr[item].num;
             innitName.textContent = innitArr[item].name;
         }
@@ -201,15 +254,12 @@ async function hpScale(targetId, currHp, maxHp){
 
 async function scaleAllHp(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
-    console.log("HP Elems Count: ", elems.length);
     for(item in elems){
         if(isNaN(item)){
-            console.log("Scaled all HP bars!");
             break;
         }
         let hpParent = elems[item].children[3];
         let hpBar = hpParent.children[1];
-        console.log("HP BAR: ", hpBar);
         let hpCurr = hpBar.firstElementChild;
         let hpMax = hpBar.children[1];
 
@@ -218,15 +268,8 @@ async function scaleAllHp(){
         let newHp = innitArr[item].hp;
         let newHpMax = innitArr[item].hpMax;
 
-        console.log("Curr Bar: ", hpCurr);
-        console.log("Curr Bar Max: ", hpMax);
         hpCurr.value = newHp;
         hpMax.value = newHpMax;
-        console.log({
-            "HP ID" : item,
-            "HP CURR: " : newHp,
-            "HP MAX: " : newHpMax
-        })
         await hpScale(item, newHp, newHpMax);
 
     }
@@ -234,17 +277,12 @@ async function scaleAllHp(){
 
 async function refreshHidden(){
     const elems = document.getElementById("list-container").getElementsByTagName("li");
-    console.log(elems.length);
-    console.log(innitArr);
     
     for(let item = 0; item < elems.length; item++){
-        console.log(innitArr[item]);
         if(innitArr[item].hidden == true && elems[item].classList.contains("hidden-false")){
-            console.log(`Hiding item number ${item};`);
             elems[item].classList.replace("hidden-false", "hidden-true");
         }
         else if(innitArr[item].hidden == false && elems[item].classList.contains("hidden-true")){
-            console.log(`Revealing item number ${item};`);
             elems[item].classList.replace("hidden-true", "hidden-false");
         }
     }
@@ -255,17 +293,110 @@ async function refreshHidden(){
 let roundCount = 0;
 let turnCount = 0;
 
+/* -- Encounter Dialog Launch -- */
+
+function storeCookie(name, value, days){
+    let expireTime = "";
+    if(days){
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expireTime = `; expires=${date.toUTCString()}`
+    }
+    document.cookie = `${name}=${value || ""}; expires=${expireTime}; SameSite=Lax`
+}
+// Cookies will last 1 day by default
+
+function getCookie(name){
+    let nameFixed = name += "=";
+    let cookieArr = document.cookie.split(";");
+    for(cookie of cookieArr){
+        let currCookie = String(cookie.trim());
+        if (currCookie.indexOf(nameFixed) == 0){
+            return currCookie.substring(nameFixed.length,currCookie.length);
+        }
+    }
+    return undefined;
+}
+
+// TODO: ENSURE DELETION OF EXPIRED COOKIES
+async function storeSessionId(){
+    let idArr = new Uint8Array(2);
+    crypto.getRandomValues(idArr);
+    let newId = String(idArr.join(''));
+    storeCookie("Innit-Session-ID", newId, 1);
+}
+
+async function getSessionId(){
+    let idCookie;
+    try{
+        idCookie = getCookie("Innit-Session-ID");
+        if(idCookie === undefined){
+            throw new ReferenceError;
+        }
+    }
+    catch(error){
+        console.error("Session ID does not exist or is undefined.\nAttempting to create new id...");
+        await storeSessionId();
+        idCookie = getCookie("Innit-Session-ID");
+    }
+    finally{return idCookie;}
+}
+
+async function storeUserId(){
+    let userArr = new Uint8Array(3);
+    crypto.getRandomValues(userArr);
+    let newUId = String(userArr.join(''));
+    storeCookie("Innit-User-ID", newUId, 7);
+}
+
+async function getSelfId(){
+    let uIdCookie;
+    try{
+        uIdCookie = getCookie("Innit-User-ID");
+        if(uIdCookie === undefined){
+            throw new ReferenceError;
+        }
+    }
+    catch(error){
+        console.error("User ID does not exist or is undefined. \nAttempting to create new id...");
+        await storeUserId();
+        uIdCookie = getCookie("Innit-User-ID");
+    }
+    finally{return uIdCookie};
+}
+
+// Window Launch Handling
+
+async function newDialog(sessionId, innitArr, settings) {
+    let dialogUrl = `./dialog.html?session=${encodeURIComponent(sessionId)}`;
+    window.open(`${dialogUrl}`, self, settings);
+}
+
+async function launchEncounter(){
+    try{
+       let id = await getSessionId();
+       let encounterWindowSettings = (
+        ""
+       );
+        await newDialog(id, innitArr, encounterWindowSettings);
+    }
+    catch(error){
+        console.error(error);
+        return new Error(error);
+    }
+}
+
+/* -- "Legacy" Encounter Turn Manips -- */
+
+
+
 async function initialTurn(){
     const deadSkip = document.getElementById("deadSkip").checked;
     const hiddenSkip = document.getElementById("hiddenSkip").checked;
     const turnList = document.getElementById("list-container");
     let startingTurn;
 
-    console.log("Aight, so far so good...");
-
     if(await infRoundLoopCheck()){return new Error("HUH???");}
-
-    console.log("closer...")
 
     startingTurn = turnList.children[0];
 
@@ -273,8 +404,6 @@ async function initialTurn(){
         moveTurn(true);
         startingTurn = turnList.children[turnCount];
     }
-
-    console.log
 
     setCurrStyle(startingTurn);
 }
@@ -340,10 +469,7 @@ async function moveTurn(isForwards){
             }
     }
 
-    console.log("Curr Turn Position: ", checkedTurnCount);
     clearCurrStyle(currTurn);
-    console.log("Turn elements: ", turnElems);
-    console.log("New Turn Count: ", checkedTurnCount);
     if(!nextTurn){
         setCurrStyle(turnElems[checkedTurnCount]);
     }
@@ -411,10 +537,9 @@ function resizeRound(){
     const roundContainer = document.getElementById("round-display");
     const button = document.getElementById("round-resize");
     const upperHeight = 350;
-    const lowerHeight = 150;
+    const lowerHeight = 175;
     let isFlipped = (button.className == "flipped") ? true : false;
     let height = roundContainer.offsetHeight;
-    console.log(`Round Counter Height: `, height);
     height >= upperHeight ? height = lowerHeight : height = upperHeight;
     roundContainer.style.height = (height + "px");
     isFlipped ? button.className = "unFlipped" : button.className = "flipped";
@@ -428,7 +553,6 @@ function editItem(event){
     const screenPanel = document.getElementById("fade-panel");
     const docBody = document.body;
         let eventTarget = event.target;
-        console.log("Event Target:", eventTarget);
         const targetId = eventTarget.id;
         /* Replaces all non-numbers with whitespace */
         const parsedId = targetId.replace(/^\D+/g, '');
@@ -449,14 +573,14 @@ function editItem(event){
         </div>
         <div class="panel-option">
             <label for="num-edit">Initative Value</label><br>
-            <input type="number" id="num-edit" placeholder="0" value="${targetItem.num}">
+            <input type="number" id="num-edit" placeholder="0" pattern="[0-9]" value="${targetItem.num}">
             <input type="checkbox" id="hide-edit" ${checkedHtml}>
             <label for="innitHide">Hide Initiative</label>
         </div>
         <div id="options-button-panel">
-            <button id="cancel" onclick="editCancel()">Cancel</button>
-            <button id="delete" onclick="editDelete(${parsedId})">Delete</button>
-            <button id="confirm" onclick="editConfirm(${parsedId})">Confirm</button>
+            <button id="cancel">Cancel</button>
+            <button id="delete">Delete</button>
+            <button id="confirm">Confirm</button>
         </div>    
     `
 
@@ -464,7 +588,24 @@ function editItem(event){
     optionsPanel.id = "options-panel";
     docBody.className = "popup";
     optionsPanel.innerHTML = editorHtml;
+
     document.body.insertBefore(optionsPanel, screenPanel);
+
+    // BUTTON LISTENERS FOR EDIT, DELETE, CANCEL
+    const cancelButton = document.getElementById("cancel");
+    cancelButton.addEventListener("click", function(e){
+        editCancel();
+    });
+
+    const deleteButton = document.getElementById("delete");
+    deleteButton.addEventListener("click", function(e){
+        editDelete(parsedId);
+    });
+
+    const confirmButton = document.getElementById("confirm");
+    confirmButton.addEventListener("click", function(e){
+        editConfirm(parsedId);
+    });
 
     /* SORT USING BUILT-IN FUNC WITH item.num, THEN REFRESH IDs
     AND RE-INSERT INTO LIST BY ID
@@ -514,28 +655,71 @@ function editDelete(innitId){
     editCancel();
 }
 
-/* -- DATA INTERACTING WITH SERVER -- */
+/* -- DATA INTERACTING WITH SERVER / LOCAL STORAGE -- */
 
-async function sendInnitArr(arr, listName){
-    const execTime = Date.now().valueOf();
-    execTime.toString().concat("-", saveList.length);
-    let checkedListName = listName || `List ${saveList.length}`;
+async function saveInnitArr(arr, listName){
+    let checkedListName = listName || `List-${saveList.length}`;
     let newList = 
         {
+            "listId" : saveList.length,
             "listName" : checkedListName,
-            "listItems" : [arr]
+            "listItems" : arr
         };
-    let packagedList = JSON.stringify(newList);
     
     try {
         saveList.push(newList);
-        localStorage.setItem(`list-${saveList.length}`, packagedList);
+        let packagedList = JSON.stringify(saveList);
+        localStorage.setItem("Saved-Lists", packagedList);
     } catch (error) {
         console.error(error);
     }
 
 }
 
-async function sendActiveArr(name){
-    await sendInnitArr(innitArr, name);
+async function saveActiveArr(name){
+    await saveInnitArr(innitArr, name);
 }
+
+async function fetchSavedLists(){
+    const data = localStorage.getItem("Saved-Lists");
+    const savedLists = JSON.parse(data);
+    saveList = savedLists;
+}
+
+function clearSavedLists(){
+    localStorage.removeItem("Saved-Lists");
+    saveList = [];
+}
+
+/*  TODO: Add framework to sync updates from config to display */
+
+function sendList(listId, command){
+    let itemData = saveList[listId].listItems;
+    let data = {
+        items : itemData,
+        type : command
+    }
+    connection.send(JSON.stringify(data));
+}
+
+
+/* -- CLIENT LIST MANAGEMENT -- */
+
+async function clearActiveList(){
+    const itemList = document.getElementById("list-container");
+    itemList.innerHTML = "";
+    innitArr.length = 0;
+}
+
+async function loadSavedList(listId){
+    await clearActiveList();
+    const newList = saveList[listId].listItems;
+    for(item in newList){
+        innitArr.push(newList[item]);
+    }
+
+    for(item in innitArr){
+        sortedInsert(innitArr[item]);
+    }
+}
+
